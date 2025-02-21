@@ -41,10 +41,3 @@ Une analyse approfondie des aspects commerciaux du projet a été réalisée pou
 
 ## Conclusion
 Ce projet met en avant une approche collaborative et innovante pour simplifier la gestion des événements tout en offrant des fonctionnalités avancées adaptées aux besoins des utilisateurs.
-
----
-
-## Instructions d'installation
-1. Cloner le dépôt :  
-   ```bash
-   git clone (https://github.com/Narodk1/Projet_tutore.git)
