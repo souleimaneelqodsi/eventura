@@ -1,6 +1,6 @@
 # Projet Tutoré (EVENTURA)
 
-<img src="eventura_app/logo_eventura.png" alt="Logo Eventura" width="200"/>
+<img src="logo_eventura.png" alt="Logo Eventura" width="200"/>
 
 ## Auteurs
 - TETAH Yacine
