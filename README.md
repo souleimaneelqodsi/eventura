@@ -1,16 +1,43 @@
-# eventura_app
+# Projet Tutoré (EVENTURA)
 
-A new Flutter project.
+<img src="logo_eventura.png" alt="Logo Eventura" width="200"/>
 
-## Getting Started
+## Auteurs
+- TETAH Yacine
+- DEKHAIL Youssef
+- MORAKEB Chahinez
+- EL QODSI Souleimane
+- KASDI Cylia
 
-This project is a starting point for a Flutter application.
+## Description du Projet
+Le projet vise à développer une application innovante permettant de gérer les événements, les utilisateurs, et les interactions entre eux. L'objectif principal est de fournir une solution intuitive et efficace pour organiser des événements.
 
-A few resources to get you started if this is your first Flutter project:
+---
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Business Model Canvas
+Une analyse approfondie des aspects commerciaux du projet a été réalisée pour identifier les segments de clientèle, les canaux de distribution, et les propositions de valeur.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+---
+
+## Diagramme de Cas d'Utilisation
+### Acteurs :
+- **Utilisateur** : Interagit avec l'application pour consulter et participer à des événements.
+- **Organisateur** : Crée et gère les événements.
+- **Invité** : Reçoit des invitations et participe aux événements.
+
+### Cas d'Utilisation Principaux :
+- Créer, modifier, et répondre à des événements.
+- Inviter ou retirer des utilisateurs.
+- Accéder à la boutique et acheter des options.
+
+---
+
+## Fonctionnalités Principales
+1. Gestion d'événements (création, modification, suppression).
+2. Gestion des utilisateurs (invitation, ajout/retrait).
+3. Accès à une boutique pour des options supplémentaires.
+
+---
+
+## Conclusion
+Ce projet met en avant une approche collaborative et innovante pour simplifier la gestion des événements tout en offrant des fonctionnalités avancées adaptées aux besoins des utilisateurs.
