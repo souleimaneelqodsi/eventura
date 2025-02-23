@@ -83,6 +83,10 @@ class AuthService {
     try {
       // Étape 1 : Création du compte dans Supabase Auth
       final AuthResponse response = await _supabaseAuth.signUp(
+   Future<void> signUp(String email, String password, String username) async {
+    try {
+      // Étape 1 : Création du compte Auth
+      final AuthResponse response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
       );
@@ -91,6 +95,10 @@ class AuthService {
 
       // Étape 2 : Ajout de l'utilisateur dans la table "users"
       await _supabaseAuth.from('users').insert({
+      if (response.user == null) throw Exception('Signup failed');
+
+      // Étape 2 : Ajout dans la table users
+      await _supabaseClient.from('users').insert({
         'id': response.user!.id,
         'email': email,
         'username': username,
@@ -105,3 +113,15 @@ class AuthService {
     }
   }
 }
+      if (kDebugMode) print('AuthService Error: $e');
+      rethrow;
+    }
+  }
+  
+  
+  }
+
+
+
+
+
