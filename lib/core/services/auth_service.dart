@@ -81,15 +81,15 @@ class AuthService {
 
    Future<void> signUp(String email, String password, String username) async {
     try {
-      // Étape 1 : Création du compte Auth
+      // Étape 1 : Création du compte dans Supabase Auth
       final AuthResponse response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
       );
 
-      if (response.user == null) throw Exception('Signup failed');
+      if (response.user == null) throw Exception('Échec de l\'inscription');
 
-      // Étape 2 : Ajout dans la table users
+      // Étape 2 : Ajout de l'utilisateur dans la table "users"
       await _supabaseClient.from('users').insert({
         'id': response.user!.id,
         'email': email,
@@ -98,15 +98,10 @@ class AuthService {
       });
       
     } catch (e) {
+      if (kDebugMode) print('Erreur AuthService : $e'); // Log en mode debug
+      rethrow; // Relance l'erreur pour le ViewModel
       print('AuthService Error: $e');
       rethrow;
     }
   }
-  
-  
-  }
-
-
-
-
-
+}
