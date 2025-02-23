@@ -77,7 +77,36 @@ class AuthService {
     }
   }
 
-  signIn(String email, String password) {}
+  void signIn(String email, String password) {}
 
-  signUp(String email, String password) {}
-}
+   Future<void> signUp(String email, String password, String username) async {
+    try {
+      // Étape 1 : Création du compte Auth
+      final AuthResponse response = await _supabaseClient.auth.signUp(
+        email: email,
+        password: password,
+      );
+
+      if (response.user == null) throw Exception('Signup failed');
+
+      // Étape 2 : Ajout dans la table users
+      await _supabaseClient.from('users').insert({
+        'id': response.user!.id,
+        'email': email,
+        'username': username,
+        'created_at': DateTime.now().toUtc().toIso8601String(),
+      });
+      
+    } catch (e) {
+      print('AuthService Error: $e');
+      rethrow;
+    }
+  }
+  
+  
+  }
+
+
+
+
+
