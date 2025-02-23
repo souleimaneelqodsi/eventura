@@ -10,20 +10,25 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3  
+      uses: actions/checkout@v3
 
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.29.0' 
+        flutter-version: '3.29.0'  
         channel: 'stable'
 
     - name: Install dependencies
       run: flutter pub get
+
+    - name: Create dummy .env file
+      run: |
+        echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+        echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
 
     - name: Analyze code (lint)
       run: flutter analyze
