@@ -1,6 +1,7 @@
 import 'package:eventura/core/models/user.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+<<<<<<< HEAD
 class AuthService {
   late final GoTrueClient _supabaseAuth;
   late final SupabaseClient _supabaseClient;
@@ -84,20 +85,33 @@ class AuthService {
       // Étape 1 : Création du compte dans Supabase Auth
       final AuthResponse response = await _supabaseAuth.signUp(
    Future<void> signUp(String email, String password, String username) async {
+=======
+class AuthService extends ChangeNotifier {
+  late final GoTrueClient _supabaseClient; // Client Supabase pour l'authentification
+
+  // Initialisation avec le client Supabase
+  AuthService({required SupabaseClient supabaseClient}) : _supabaseClient = supabaseClient.auth;
+
+  // Méthode d'inscription
+  Future<void> signUp(String email, String password, String username) async {
+>>>>>>> 6ed5b72 (feat: implémenter le flux d'inscription complet avec Supabase)
     try {
-      // Étape 1 : Création du compte Auth
+      // Étape 1 : Création du compte dans Supabase Auth
       final AuthResponse response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
       );
 
       if (response.user == null) throw Exception('Échec de l\'inscription');
+<<<<<<< HEAD
 
       // Étape 2 : Ajout de l'utilisateur dans la table "users"
       await _supabaseAuth.from('users').insert({
       if (response.user == null) throw Exception('Signup failed');
+=======
+>>>>>>> 6ed5b72 (feat: implémenter le flux d'inscription complet avec Supabase)
 
-      // Étape 2 : Ajout dans la table users
+      // Étape 2 : Ajout de l'utilisateur dans la table "users"
       await _supabaseClient.from('users').insert({
         'id': response.user!.id,
         'email': email,
@@ -108,6 +122,7 @@ class AuthService {
     } catch (e) {
       if (kDebugMode) print('Erreur AuthService : $e'); // Log en mode debug
       rethrow; // Relance l'erreur pour le ViewModel
+<<<<<<< HEAD
       print('AuthService Error: $e');
       rethrow;
     }
@@ -115,13 +130,8 @@ class AuthService {
 }
       if (kDebugMode) print('AuthService Error: $e');
       rethrow;
+=======
+>>>>>>> 6ed5b72 (feat: implémenter le flux d'inscription complet avec Supabase)
     }
   }
-  
-  
-  }
-
-
-
-
-
+}
