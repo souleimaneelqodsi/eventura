@@ -1,3 +1,4 @@
 {
-    "dart.showTodos": false
+    "dart.showTodos": false,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

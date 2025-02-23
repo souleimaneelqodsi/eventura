@@ -1,3 +1,4 @@
+import 'package:eventura/providers.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
 import 'package:eventura/ui/static/faq.dart';
@@ -20,6 +21,8 @@ import 'package:eventura/ui/views/messages_view.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:eventura/ui/views/settings_view.dart';
 
+// Removed duplicate import
+
 
 final supabase = Supabase.instance.client;
 
@@ -27,6 +30,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
 
+  
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
 
@@ -36,9 +40,7 @@ Future<void> main() async {
   );
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider<AuthService>(create: (_) => AuthService(supabaseClient: supabase)),
-      ],
+      providers: providers,
       child: const MyApp(),
     ),
   );

@@ -15,8 +15,6 @@ import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/messages_list_viewmodel.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
-import 'package:eventura/core/viewmodels/base_viewmodel.dart'; // Add this
-
 
 final supabase = Supabase.instance.client;
 
@@ -38,8 +36,8 @@ List<SingleChildWidget> providers = [
   // --- ViewModels ---
 
   // Auth View Models:
-  ChangeNotifierProvider<LoginViewmodel>(
-    create: (context) => LoginViewmodel(authService: context.read<AuthService>()),
+  ChangeNotifierProvider<LoginViewModel>(
+    create: (context) => LoginViewModel(authService: context.read<AuthService>()),
   ),
   ChangeNotifierProvider<SignupViewmodel>(
     create: (context) => SignupViewmodel(authService: context.read<AuthService>()),
