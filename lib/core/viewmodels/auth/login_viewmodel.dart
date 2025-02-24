@@ -18,6 +18,6 @@ class LoginViewmodel extends BaseViewModel {
       setBusy(false);
     }
   }
-  
+
   void setErrorMessage(String string) {}
 }
