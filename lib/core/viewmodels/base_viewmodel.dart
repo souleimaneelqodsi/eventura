@@ -1,21 +1,23 @@
 import 'package:flutter/material.dart';
 
 class BaseViewModel extends ChangeNotifier {
-  bool _busy = false;
-  bool _error = false;
-  String _errorMessage = '';
+  bool _isBusy = false;
+  bool get isBusy => _isBusy;
+
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
 
   void setBusy(bool value) {
-    _busy = value;
+    _isBusy = value;
     notifyListeners();
   }
 
   void setError(String? message) {
-    _errorMessage = message!;
+    _errorMessage = message;
     notifyListeners();
   }
 
-    bool get hasError => _errorMessage != null;
+  bool get hasError => _errorMessage != null;
 
   @override
   // ignore: unnecessary_overrides
