@@ -8,4 +8,20 @@ class AuthService extends ChangeNotifier {
 
   signIn(String email, String password) {}
 
-  signUp(String email, String password) {}}
+  signUp(String email, String password) {}
+  
+   // Implémentation de la méthode resetPassword()
+   // Cette méthode permet de réinitialiser le mot de passe d'un utilisateur
+
+  Future<void> resetPassword(String email) async {
+    try {
+      // Appel de la méthode resetPasswordForEmail() du client GoTrue
+      await _supabaseClient.resetPasswordForEmail(email);
+      print("E-mail de réinitialisation du mot de passe envoyé avec succès.");
+    } catch (error) {
+      print("Erreur lors de la réinitialisation du mot de passe : $error");
+      throw error;
+    }
+  
+  }
+}
