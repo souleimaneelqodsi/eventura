@@ -11,8 +11,6 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
   final TextEditingController _emailController = TextEditingController();
 
   @override
-  //implementation du widget
-  
   Widget build(BuildContext context) {
     // Récupération de l'instance de ResetPasswordViewModel
     final resetPasswordViewModel = Provider.of<ResetPasswordViewModel>(context);
@@ -42,14 +40,14 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
               ),
             ),
             SizedBox(height: 20),
-            resetPasswordViewModel.isLoading
+            resetPasswordViewModel.isBusy
                 ? CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: () async {
                       final email = _emailController.text.trim();
                       if (email.isNotEmpty) {
                         await resetPasswordViewModel.resetPassword(email);
-                        if (resetPasswordViewModel.errorMessage == null) {
+                        if (!resetPasswordViewModel.hasError) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("✅ E-mail de réinitialisation envoyé !")),
                           );
