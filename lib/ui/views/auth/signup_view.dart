@@ -1,13 +1,14 @@
+import 'package:eventura/core/viewmodels/auth/signup_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/core/viewmodels/signup_viewmodel.dart';
+import 'package:eventura/core/viewmodels/auth/signup_viewmodel.dart';
 
 class SignupView extends StatelessWidget {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _usernameController = TextEditingController();
 
-  const SignupView({super.key});
+  SignupView({super.key});
 
   @override
   Widget build(BuildContext context) {

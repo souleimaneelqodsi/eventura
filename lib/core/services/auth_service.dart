@@ -82,7 +82,7 @@ class AuthService {
    Future<void> signUp(String email, String password, String username) async {
     try {
       // Étape 1 : Création du compte dans Supabase Auth
-      final AuthResponse response = await _supabaseClient.auth.signUp(
+      final AuthResponse response = await _supabaseAuth.signUp(
         email: email,
         password: password,
       );
@@ -90,7 +90,7 @@ class AuthService {
       if (response.user == null) throw Exception('Échec de l\'inscription');
 
       // Étape 2 : Ajout de l'utilisateur dans la table "users"
-      await _supabaseClient.from('users').insert({
+      await _supabaseAuth.from('users').insert({
         'id': response.user!.id,
         'email': email,
         'username': username,
