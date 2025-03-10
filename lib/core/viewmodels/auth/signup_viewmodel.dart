@@ -1,12 +1,13 @@
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
+import 'package:flutter/widgets.dart';
 
 class SignupViewmodel extends BaseViewModel {
   final AuthService authService;
 
   SignupViewmodel({required this.authService});
 
-  Future<int> signUp({
+  Future<int> signUp(BuildContext context,{
     required String email,
     required String password,
     String? firstName,
@@ -21,7 +22,7 @@ class SignupViewmodel extends BaseViewModel {
         firstName: firstName,
         lastName: lastName,
       );
-      if (response == null) {
+      if (response != null) {
         return 0;
       }
     } catch (e) {
