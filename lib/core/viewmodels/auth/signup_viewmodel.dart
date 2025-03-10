@@ -3,24 +3,32 @@ import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 
 class SignupViewmodel extends BaseViewModel {
   final AuthService authService;
-  String? _errorMessage;
 
   SignupViewmodel({required this.authService});
 
-  String? get errorMessage => _errorMessage;
-
-  Future<void> signUp(String email, String password, String username) async {
+  Future<int> signUp({
+    required String email,
+    required String password,
+    String? firstName,
+    String? lastName,
+  }) async {
     try {
       setBusy(true);
-      _errorMessage = null;
-      
-      await authService.signUp(email, password, username);
-      
+      setError(null);
+      var response = await authService.signUp(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+      );
+      if (response == null) {
+        return 0;
+      }
     } catch (e) {
-      _errorMessage = "Erreur d'inscription : ${e.toString()}";
-      notifyListeners();
+      setError(e.toString().replaceFirst("Exception: ", ''));
     } finally {
       setBusy(false);
     }
+    return 1;
   }
 }

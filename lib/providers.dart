@@ -30,8 +30,6 @@ List<SingleChildWidget> providers = [
   ),
 
   // --- ViewModels ---
-
-  // Auth View Models:
   ChangeNotifierProvider<LoginViewmodel>(
     create: (context) => LoginViewmodel(authService: context.read<AuthService>()),
   ),
@@ -39,24 +37,20 @@ List<SingleChildWidget> providers = [
     create: (context) => SignupViewmodel(authService: context.read<AuthService>()),
   ),
 
-  // Event View Models:
   ChangeNotifierProvider<EventsListViewmodel>(
     create: (context) => EventsListViewmodel(eventService: context.read<EventService>()),
   ),
   ChangeNotifierProvider<CreateEventViewmodel>(
     create: (context) => CreateEventViewmodel(eventService: context.read<EventService>()),
   ),
-  // Friend View Model
   ChangeNotifierProvider<FriendsViewmodel>(
     create: (context) => FriendsViewmodel(friendService: context.read<FriendService>()),
   ),
 
-  // Message List View Model
   ChangeNotifierProvider<MessagesListViewmodel>(
     create: (context) => MessagesListViewmodel(messageService: context.read<MessageService>()),
   ),
 
-  // Settings View Model
   ChangeNotifierProvider<SettingsViewmodel>(
     create: (context) => SettingsViewmodel(), 
   ),

@@ -5,7 +5,7 @@ class UserModel {
   final String? profilePicture; // URL to the profile picture
   final String? timezone;
   final String? language;
-  final String? userRole; // "user", "admin", "organizer"
+  final String? userRole; 
   final String? accStatus; //"active", "inactive", "banned"
   final DateTime? lastLogin;
   final bool? firstLogin;
