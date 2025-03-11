@@ -51,14 +51,15 @@ class AuthService {
     }
   }
 
-    Future<bool> isFirstLogin(String userId) async{
-     final UserModel? usr = await getUserById(userId);
-     if(usr == null){
-      throw Exception("Une erreur s'est produite ou l'utilisateur n'existe pas.");
-     }
-     else{
+  Future<bool> isFirstLogin(String userId) async {
+    final UserModel? usr = await getUserById(userId);
+    if (usr == null) {
+      throw Exception(
+        "Une erreur s'est produite ou l'utilisateur n'existe pas.",
+      );
+    } else {
       return usr.firstLogin ?? false;
-     }
+    }
   }
 
   Future<UserModel?> updateUser(UserModel user) async {
@@ -132,7 +133,10 @@ class AuthService {
             final user = await createUser(newUser);
             return user;
           } catch (error) {
-            logger.e("An error occurred while creating the user in the databse", error: error);
+            logger.e(
+              "An error occurred while creating the user in the databse",
+              error: error,
+            );
             rethrow;
           }
         }
@@ -149,7 +153,25 @@ class AuthService {
     return null;
   }
 
-  Future<void> signIn(String email, String password) async {}
+  Future<void> signIn(String email, String password) async {
+    try {
+      final response = await _supabaseAuth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      if (response.session == null || response.user == null) {
+        throw Exception(
+          "An error occurred while logging in. Please try again or contact support.",
+        );
+      }
+    } on AuthException catch (error) {
+      logger.e("Auth Error while logging in the user.");
+      throw Exception(error.message);
+    } catch (error) {
+      logger.e("Unknown error during log in.");
+      throw Exception("Failed to login: ${error.toString()}");
+    }
+  }
 
   Future<void> signOut() async {}
 }
