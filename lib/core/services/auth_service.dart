@@ -146,7 +146,25 @@ class AuthService {
     }
   }
 
-  Future<void> signIn(String email, String password) async {}
+  Future<void> signIn(String email, String password) async {
+    try {
+      final response = await _supabaseAuth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      if (response.session == null || response.user == null) {
+        throw Exception(
+          "An error occurred while logging in. Please try again or contact support.",
+        );
+      }
+    } on AuthException catch (error) {
+      logger.e("Auth Error while logging in the user.");
+      throw Exception(error.message);
+    } catch (error) {
+      logger.e("Unknown error during log in.");
+      throw Exception("Failed to login: ${error.toString()}");
+    }
+  }
 
   Future<void> signOut() async {}
 }
