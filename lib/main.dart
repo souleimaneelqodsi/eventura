@@ -1,4 +1,4 @@
-import 'package:eventura/core/services/auth_service.dart';
+//import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/providers.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
@@ -55,13 +55,12 @@ import 'package:eventura/ui/views/settings_view.dart';
         theme: AppTheme().light,
         initialRoute: '/', 
         routes: {
-          '/': (context) => AuthWrapper(authService: Provider.of<AuthService>(context)),
+          '/': (context) => const AuthWrapper(),
           '/login': (context) => LoginView(),
           '/signup': (context) => SignupView(),
           '/reset_password': (context) => ResetPasswordView(),
           '/welcome' : (context) => WelcomeView(),
           '/home': (context) => HomepageView(), 
-          '/events': (context) => EventListView(), 
           '/create_event': (context) => CreateEventView(),
           '/event_detail': (context) {
             final args = ModalRoute.of(context)!.settings.arguments;
