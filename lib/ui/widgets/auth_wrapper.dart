@@ -8,7 +8,7 @@ class AuthWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Supabase.instance.client.auth.signOut();
+    //Supabase.instance.client.auth.signOut();
     final user = Supabase.instance.client.auth.currentUser;
 
     if (user != null) {
