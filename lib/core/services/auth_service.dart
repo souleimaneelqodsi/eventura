@@ -51,14 +51,15 @@ class AuthService {
     }
   }
 
-    Future<bool> isFirstLogin(String userId) async{
-     final UserModel? usr = await getUserById(userId);
-     if(usr == null){
-      throw Exception("Une erreur s'est produite ou l'utilisateur n'existe pas.");
-     }
-     else{
+  Future<bool> isFirstLogin(String userId) async {
+    final UserModel? usr = await getUserById(userId);
+    if (usr == null) {
+      throw Exception(
+        "Une erreur s'est produite ou l'utilisateur n'existe pas.",
+      );
+    } else {
       return usr.firstLogin ?? false;
-     }
+    }
   }
 
   Future<UserModel?> updateUser(UserModel user) async {
@@ -104,8 +105,6 @@ class AuthService {
     }
   }
 
-  // sign-up method
-
   Future<UserModel?> signUp({
     required String email,
     required String password,
@@ -113,28 +112,27 @@ class AuthService {
     String? lastName,
   }) async {
     try {
-      final authResponse = await _supabaseClient.auth.signUp(
+      final response = await _supabaseClient.auth.signUp(
         email: email,
         password: password,
       );
-      // Supabase Auth, Supabase Database
-
-      if (authResponse.user != null) {
+      if (response.user != null) {
         final newUser = UserModel(
-          userId: authResponse.user!.id,
+          userId: response.user!.id,
           email: email,
           firstName: firstName,
           lastName: lastName,
           firstLogin: true,
         );
-        if (authResponse.session != null) {
-          try {
-            final user = await createUser(newUser);
-            return user;
-          } catch (error) {
-            logger.e("An error occurred while creating the user in the databse", error: error);
-            rethrow;
-          }
+        try {
+          final user = await createUser(newUser);
+          return user;
+        } catch (error) {
+          logger.e(
+            "An error occurred while creating the user in the databse",
+            error: error,
+          );
+          rethrow;
         }
       } else {
         throw Exception("Sign-up failed: Please try again or contact support.");
@@ -146,7 +144,6 @@ class AuthService {
       logger.e("Unexpected error during sign up", error: error);
       throw Exception("Failed to sign up: ${error.toString()}");
     }
-    return null;
   }
 
   Future<void> signIn(String email, String password) async {}
