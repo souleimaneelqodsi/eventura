@@ -1,26 +1,45 @@
-import 'package:eventura/core/services/event_service.dart';
-import 'package:eventura/core/models/event.dart';
-import 'package:eventura/core/viewmodels/base_viewmodel.dart';
+// events_list_viewmodel.dart
+import 'dart:async';
 
-class EventsListViewModel extends BaseViewModel {
+import 'package:eventura/core/models/event.dart';
+import 'package:eventura/core/services/event_service.dart';
+import 'package:eventura/core/viewmodels/base_viewmodel.dart';
+import 'package:flutter/material.dart';
+
+class EventListViewmodel extends BaseViewmodel {
   final EventService _eventService;
   List<Event> _events = [];
+  StreamSubscription? _subscription;
 
   List<Event> get events => _events;
 
-  EventsListViewModel({required EventService eventService})
-      : _eventService = eventService;
+  EventListViewmodel({required EventService eventService})
+    : _eventService = eventService {
+    _subscribeToEvents();
+  }
 
-  // Charger tous les événements
-  Future<void> loadEvents() async {
+  void _subscribeToEvents() {
     setBusy(true);
-    try {
-      _events = await _eventService.getAllEvents();
-    } catch (e) {
-      print("Erreur lors du chargement des événements: $e");
-      _events = [];
-    }
-    setBusy(false);
-    notifyListeners();
+    _subscription = _eventService.getEventsStream().listen(
+      (events) {
+        _events = events;
+        notifyListeners();
+        setBusy(false);
+      },
+      onError: (error) {
+        setError(error.toString());
+        setBusy(false);
+      },
+    );
+  }
+
+  Future<void> refreshEvents() async {
+    _subscribeToEvents();
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }

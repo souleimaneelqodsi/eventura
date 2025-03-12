@@ -1,6 +1,6 @@
 class Event {
   final int? eventId;
-  final int organizerId;
+  final String organizerId;
   final String? coverPicture;
   final DateTime dateOfBeginning;
   final String title;
@@ -21,25 +21,21 @@ class Event {
     required this.isPrivate,
   });
 
-  // Convertir un JSON en objet Event
   factory Event.fromJson(Map<String, dynamic> json) {
     return Event(
-      eventId: json['event_id'],
-      organizerId: json['organizer_id'],
-      coverPicture: json['cover_picture'],
-      dateOfBeginning: DateTime.parse(json['date_of_beginning']),
-      title: json['title'],
-      description: json['description'],
-      location: json['location'],
-      capacity: json['capacity'],
-      isPrivate: json['is_private'] == 1, // Stocké en int (1/0)
+      eventId: json['event_id'] as int?,
+      organizerId: json['organizer_id'] as String,
+      coverPicture: json['cover_picture'] as String?,
+      dateOfBeginning: DateTime.parse(json['date_of_beginning'] as String),
+      title: json['title'] as String,
+      description: json['description'] as String,
+      location: json['location'] as String,
+      capacity: json['capacity'] as int,
+      isPrivate: (json['is_private'] as bool),
     );
   }
-
-  // Convertir un objet Event en JSON
   Map<String, dynamic> toJson() {
-    return {
-      'event_id': eventId,
+    final Map<String, dynamic> data = {
       'organizer_id': organizerId,
       'cover_picture': coverPicture,
       'date_of_beginning': dateOfBeginning.toIso8601String(),
@@ -47,7 +43,37 @@ class Event {
       'description': description,
       'location': location,
       'capacity': capacity,
-      'is_private': isPrivate ? 1 : 0, // Stocké en int (1/0)
+      'is_private': isPrivate,
     };
+
+    if (eventId != null) {
+      data['event_id'] = eventId;
+    }
+
+    return data;
+  }
+
+  Event copyWith({
+    int? eventId,
+    String? organizerId,
+    String? coverPicture,
+    DateTime? dateOfBeginning,
+    String? title,
+    String? description,
+    String? location,
+    int? capacity,
+    bool? isPrivate,
+  }) {
+    return Event(
+      eventId: eventId ?? this.eventId,
+      organizerId: organizerId ?? this.organizerId,
+      coverPicture: coverPicture ?? this.coverPicture,
+      dateOfBeginning: dateOfBeginning ?? this.dateOfBeginning,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      location: location ?? this.location,
+      capacity: capacity ?? this.capacity,
+      isPrivate: isPrivate ?? this.isPrivate,
+    );
   }
 }

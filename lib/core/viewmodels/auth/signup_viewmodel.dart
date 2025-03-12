@@ -2,7 +2,7 @@ import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 import 'package:flutter/widgets.dart';
 
-class SignupViewmodel extends BaseViewModel {
+class SignupViewmodel extends BaseViewmodel {
   final AuthService authService;
 
   SignupViewmodel({required this.authService});

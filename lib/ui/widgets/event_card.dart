@@ -10,9 +10,8 @@ class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(event.title),
+        title: Text(event.title, style: TextStyle(fontSize: 20),),
         subtitle: Text(event.location),
-        trailing: const Icon(Icons.arrow_forward),
         onTap: () {
           Navigator.pushNamed(
             context,
