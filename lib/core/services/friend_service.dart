@@ -45,7 +45,7 @@ class FriendService {
       rethrow;
     }
   }
-
+  // byby
   Future<void> blockUser(String friendRequestId) async {
     try {
       await _supabaseClient
