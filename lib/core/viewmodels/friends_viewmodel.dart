@@ -10,22 +10,20 @@ class FriendsViewmodel extends BaseViewModel {
   List<Map<String, dynamic>> friends = [];
   List<Map<String, dynamic>> pendingRequests = [];
 
-   // Charge les amis et les demandes
   Future<void> fetchFriendsAndRequests(String currentUserId) async {
     try {
       setBusy(true);
-      friends = await friendService.getFriends(currentUserId);
+      friends = await friendService.getFriends(currentUserId);// Récupère les amis
       pendingRequests = await friendService.getPendingRequests(currentUserId);
     } catch (e) {
-      setError(e.toString()); // Affiche une erreur
+      setError(e.toString());
       rethrow;
     } finally {
-      setBusy(false);   // Désactive le chargement
-    }
+      setBusy(false);
     }
   }
-  
-    // Envoie une demande d'ami (méthode similaire pour accept/reject/block)
+
+  // Envoie une demande d'ami (méthode similaire pour accept/reject/block)
   Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
     try {
       setBusy(true);
