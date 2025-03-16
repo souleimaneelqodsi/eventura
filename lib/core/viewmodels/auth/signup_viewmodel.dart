@@ -1,25 +1,30 @@
 import 'package:eventura/core/services/auth_service.dart';
-import 'package:flutter/foundation.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
+import 'package:flutter/widgets.dart';
 
 class SignupViewmodel extends BaseViewModel {
-  SignupViewmodel({required this.authService});
-
   final AuthService authService;
 
-  Future<void> signUp(String email, String password) async {
+  SignupViewmodel({required this.authService});
+
+  Future<void> signUp(BuildContext context,{
+    required String email,
+    required String password,
+    String? firstName,
+    String? lastName,
+  }) async {
     try {
       setBusy(true);
-      await authService.signUp(email, password);
+      await authService.signUp(
+        email: email,
+        password: password,
+        firstName: firstName,
+        lastName: lastName,
+      );
     } catch (e) {
-      // Handle signup error
-      setError(true as String?);
-      setErrorMessage(e.toString());
-      rethrow;
+      setError(e.toString().replaceFirst("Exception: ", ''));
     } finally {
       setBusy(false);
     }
   }
-  
-  void setErrorMessage(String string) {}
 }
