@@ -6,19 +6,19 @@ class FriendService {
   FriendService({required SupabaseClient supabaseClient})
       : _supabaseClient = supabaseClient;
 
- // Envoie une demande d'ami
+  // Envoie une demande d'ami
   Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
     try {
       await _supabaseClient
           .from('friends')
-          .insert({  
+          .insert({
             'requestor_id': fromUserId,
             'receiver_id': toUserId,
             'status': 'pending',
           })
-          .single(); // Garantit qu'une seule ligne est insérée
+          .single();
     } catch (e) {
-      rethrow;  // Relance l'erreur pour la gérer ailleurs
+      rethrow;
     }
   }
 
@@ -58,8 +58,7 @@ class FriendService {
     }
   }
 
-
-   // Récupère la liste des amis
+  // Récupère la liste des amis
   Future<List<Map<String, dynamic>>> getFriends(String userId) async {
     try {
       final response = await _supabaseClient
@@ -67,17 +66,13 @@ class FriendService {
           .select()
           .or('requestor_id.eq.$userId,receiver_id.eq.$userId')
           .eq('status', 'accepted');
-      if (response is List) {
-        return List<Map<String, dynamic>>.from(response);
-      }
-      return [];
+      return List<Map<String, dynamic>>.from(response);
     } catch (e) {
       rethrow;
     }
   }
 
-
- // Récupère les demandes en attente
+  // Récupère les demandes en attente
   Future<List<Map<String, dynamic>>> getPendingRequests(String userId) async {
     try {
       final response = await _supabaseClient
@@ -85,10 +80,7 @@ class FriendService {
           .select()
           .eq('receiver_id', userId)
           .eq('status', 'pending');
-      if (response is List) {
-        return List<Map<String, dynamic>>.from(response);
-      }
-      return [];
+      return List<Map<String, dynamic>>.from(response);
     } catch (e) {
       rethrow;
     }
