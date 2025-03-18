@@ -52,3 +52,4 @@ app.*.map.json
 
 # private files
 ideas.md
+last_checkpoint.md
