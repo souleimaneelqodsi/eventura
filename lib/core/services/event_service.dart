@@ -14,20 +14,31 @@ class EventService {
 
   Future<Event?> getEventById(int eventId) async {
     try {
-      final response =
-          await _supabaseClient
-              .from('events')
-              .select()
-              .eq('event_id', eventId)
-              .single();
+      final response = await _supabaseClient
+          .from('events')
+          .select()
+          .eq('event_id', eventId);
 
-      if (response == null) {
+      // ignore: unnecessary_type_check
+      if ((response is List && response.isEmpty) || response == null) {
         String msg = "Aucun événement trouvé avec l'ID $eventId.";
         log.i(msg);
         throw Exception(msg);
       }
 
-      return Event.fromJson(response);
+      log.d(response);
+
+      if (response is Map) {
+        return Event.fromJson(response as Map<String, dynamic>);
+      } else {
+        // ignore: unnecessary_type_check
+        if (response is List) {
+          return Event.fromJson(response[0]);
+        }
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        log.i(msg);
+        throw Exception(msg);
+      }
     } catch (e) {
       log.e("Erreur lors de la récupération de l'événement : $e");
       rethrow;
@@ -45,7 +56,7 @@ class EventService {
   }
 
   Stream<List<Event>> getEventsStream() {
-    if(_supabaseClient != null) log.t("Supabase Client is not null") ;
+    if (_supabaseClient != null) log.t("Supabase Client is not null");
     return _supabaseClient
         .from('events')
         .stream(primaryKey: ['event_id'])
