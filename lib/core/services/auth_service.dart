@@ -51,17 +51,6 @@ class AuthService {
     }
   }
 
-  Future<bool> isFirstLogin(String userId) async {
-    final UserModel? usr = await getUserById(userId);
-    if (usr == null) {
-      throw Exception(
-        "Une erreur s'est produite ou l'utilisateur n'existe pas.",
-      );
-    } else {
-      return usr.firstLogin ?? false;
-    }
-  }
-
   Future<UserModel?> updateUser(UserModel user) async {
     try {
       final response =
