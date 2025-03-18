@@ -5,7 +5,9 @@ class ResetPasswordView extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+      appBar: AppBar(title: Text("Reset your password"),),
+      body: Container(),
+    );
   }
 }

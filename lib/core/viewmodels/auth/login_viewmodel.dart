@@ -19,20 +19,6 @@ class LoginViewmodel extends BaseViewmodel {
     try {
       setBusy(true);
       await authService.signIn(email, password);
-      /*var usr = await authService.getUserById(authService.currentUser!.id);
-      logger.i("${usr!.firstLogin}");
-      if (usr.firstLogin ?? true) {
-        var usrJson = usr.toJson();
-        usrJson["firstLogin"] = false;
-        var newUser = UserModel.fromJson(usrJson);
-        await authService.updateUser(newUser);
-        if (context.mounted) {
-          logger.t("welcome");
-          Navigator.pushReplacementNamed(context, "/welcome");
-          return;
-        }
-      }
-      logger.t("home");*/
       if (context.mounted) Navigator.pushReplacementNamed(context, "/home");
     } catch (e) {
       setError(e.toString().replaceFirst("Exception: ", ''));

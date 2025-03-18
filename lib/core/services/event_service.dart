@@ -40,7 +40,7 @@ class EventService {
         throw Exception(msg);
       }
     } catch (e) {
-      log.e("Erreur lors de la récupération de l'événement : $e");
+      log.e("Erreur lors de la récupération de l'événement.", error:e);
       rethrow;
     }
   }
@@ -50,7 +50,7 @@ class EventService {
       final response = await _supabaseClient.from('events').select();
       return response.map<Event>((json) => Event.fromJson(json)).toList();
     } catch (e) {
-      log.e("Erreur lors de la récupération des événements : $e");
+      log.e("Erreur lors de la récupération des événements", error:e);
       rethrow;
     }
   }
@@ -76,7 +76,7 @@ class EventService {
       }
       return null;
     } catch (error) {
-      log.e("Error creating event");
+      log.e("Error creating event", error:error);
       rethrow;
     }
   }
@@ -103,7 +103,7 @@ class EventService {
       }
       return Event.fromJson(response);
     } catch (e) {
-      log.e("Erreur lors de la mise à jour de l'événement : $e");
+      log.e("Erreur lors de la mise à jour de l'événement", error:e);
       rethrow;
     }
   }
@@ -112,7 +112,7 @@ class EventService {
     try {
       await _supabaseClient.from('events').delete().eq('event_id', eventId);
     } catch (e) {
-      log.e("Erreur lors de la suppression de l'événement : $e");
+      log.e("Erreur lors de la suppression de l'événement", error:e);
       rethrow;
     }
   }

@@ -13,7 +13,6 @@ class EventListViewmodel extends BaseViewmodel {
 
   List<Event> get events => _events;
 
-
   final log = Logger();
 
   EventListViewmodel({required EventService eventService})
@@ -34,17 +33,14 @@ class EventListViewmodel extends BaseViewmodel {
         setBusy(false);
       },
     );
-    log.t("subscribeToEvents() end of listening to the stream: ${_subscription == null}");
   }
 
   Future<void> refreshEvents() async {
-    log.t("Call to refreshEvents() with subscription valued at $_subscription");
     _subscribeToEvents();
   }
 
   @override
   void dispose() {
-    log.t("Subscription is about to be called and might be null : ${_subscription == null}");
     _subscription?.cancel();
     super.dispose();
   }
