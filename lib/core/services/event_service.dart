@@ -45,6 +45,7 @@ class EventService {
   }
 
   Stream<List<Event>> getEventsStream() {
+    if(_supabaseClient != null) log.t("Supabase Client is not null") ;
     return _supabaseClient
         .from('events')
         .stream(primaryKey: ['event_id'])

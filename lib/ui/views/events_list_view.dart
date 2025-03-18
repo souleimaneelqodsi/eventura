@@ -9,11 +9,10 @@ class EventListView extends StatefulWidget {
   const EventListView({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _EventListViewState createState() => _EventListViewState();
+  EventListViewState createState() => EventListViewState();
 }
 
-class _EventListViewState extends State<EventListView> {
+class EventListViewState extends State<EventListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,59 +28,18 @@ class _EventListViewState extends State<EventListView> {
       ),
       body: Consumer<EventListViewmodel>(
         builder: (context, vmodel, child) {
-          if (vmodel.isBusy) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
+          // ... (keep your existing condition checks for isBusy, hasError, etc.)
 
-          if (vmodel.hasError) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Erreur: ${vmodel.errorMessage}",
-                  style: const TextStyle(color: Colors.red, fontSize: 17),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => vmodel.refreshEvents(),
-                  child: const Text("Réessayer"),
-                )
-              ],
-            );
-          }
-
-          if (vmodel.events.isEmpty) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Aucun événement disponible",
-                  style: TextStyle(fontSize: 20),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () => vmodel.refreshEvents(),
-                  child: const Text("Actualiser"),
-                )
-              ],
-            );
-          }
-
-          return SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: RefreshIndicator(
-                onRefresh: () => vmodel.refreshEvents(),
-                child: ListView.builder(
-                  itemCount: vmodel.events.length,
-                  itemBuilder: (context, index) {
-                    final event = vmodel.events[index];
-                    return EventCard(event: event);
-                  },
-                ),
-              ),
+          // Corrected section for the ListView
+          return RefreshIndicator(
+            onRefresh: () => vmodel.refreshEvents(),
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16.0), // Apply padding here
+              itemCount: vmodel.events.length,
+              itemBuilder: (context, index) {
+                final event = vmodel.events[index];
+                return EventCard(event: event);
+              },
             ),
           );
         },

@@ -36,7 +36,7 @@ class EventDetailView extends StatelessWidget {
           }
           final event = vmodel.event!;
           return Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(32.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -47,25 +47,49 @@ class EventDetailView extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                const SizedBox(height: 30),
+                RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: "Lieu",
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextSpan(
+                        text: " : ${event.title}",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text("Lieu: ${event.location}"),
-                const SizedBox(height: 8),
-                Text("Description: ${event.description}"),
-                const SizedBox(height: 16),
+                RichText(
+                  text: TextSpan(
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: "Description",
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      TextSpan(
+                        text: " : ${event.description}",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    /*ElevatedButton(
-                      onPressed: () {
-                        //Navigator.pushNamed(
-                        //context,
-                        //"/edit_event",
-                        //arguments: event,
-                        //);
-                      },
-                      child: const Text("Modifier"),
-                    ),*/
                     ElevatedButton(
                       onPressed: () {
                         showDialog(
@@ -97,7 +121,12 @@ class EventDetailView extends StatelessWidget {
                                     child:
                                         vmodel.isBusy
                                             ? CircularProgressIndicator()
-                                            : Text("Supprimer"),
+                                            : Text(
+                                              "Supprimer",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
                                   ),
                                 ],
                               ),
@@ -106,7 +135,13 @@ class EventDetailView extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                       ),
-                      child: const Text("Supprimer"),
+                      child: const Text(
+                        "Supprimer",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),

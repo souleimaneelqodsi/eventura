@@ -1,5 +1,4 @@
 // providers.dart
-import 'package:eventura/core/models/event.dart';
 import 'package:eventura/core/services/message_service.dart';
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:provider/provider.dart';

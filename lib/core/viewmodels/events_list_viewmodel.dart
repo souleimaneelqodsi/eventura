@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:eventura/core/models/event.dart';
 import 'package:eventura/core/services/event_service.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
-import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 
 class EventListViewmodel extends BaseViewmodel {
   final EventService _eventService;
@@ -12,6 +12,9 @@ class EventListViewmodel extends BaseViewmodel {
   StreamSubscription? _subscription;
 
   List<Event> get events => _events;
+
+
+  final log = Logger();
 
   EventListViewmodel({required EventService eventService})
     : _eventService = eventService {
@@ -31,14 +34,17 @@ class EventListViewmodel extends BaseViewmodel {
         setBusy(false);
       },
     );
+    log.t("subscribeToEvents() end of listening to the stream: ${_subscription == null}");
   }
 
   Future<void> refreshEvents() async {
+    log.t("Call to refreshEvents() with subscription valued at $_subscription");
     _subscribeToEvents();
   }
 
   @override
   void dispose() {
+    log.t("Subscription is about to be called and might be null : ${_subscription == null}");
     _subscription?.cancel();
     super.dispose();
   }

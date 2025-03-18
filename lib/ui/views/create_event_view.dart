@@ -29,9 +29,9 @@ class _CreateEventViewState extends State<CreateEventView> {
         appBar: AppBar(title: const Text("Créer un événement")),
         body: Consumer<EventViewmodel>(
           builder: (context, vmodel, child) {
-            return SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(32.0),
+            return Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: SingleChildScrollView(
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -58,7 +58,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                         value: isPrivate,
                         onChanged: (value) => setState(() => isPrivate = value),
                       ),
-                      Expanded(child:Container()),
+                      Container(),
                       ElevatedButton(
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
