@@ -1,10 +1,51 @@
+// events_list_viewmodel.dart
+import 'dart:async';
+
+import 'package:eventura/core/models/event.dart';
 import 'package:eventura/core/services/event_service.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
+import 'package:logger/logger.dart';
 
-class EventsListViewmodel extends BaseViewModel {
-  EventsListViewmodel({required this.eventService});
+class EventListViewmodel extends BaseViewmodel {
+  final EventService _eventService;
+  List<Event> _events = [];
+  StreamSubscription? _subscription;
 
-  final EventService eventService;
+  List<Event> get events => _events;
 
 
+  final log = Logger();
+
+  EventListViewmodel({required EventService eventService})
+    : _eventService = eventService {
+    _subscribeToEvents();
+  }
+
+  void _subscribeToEvents() {
+    setBusy(true);
+    _subscription = _eventService.getEventsStream().listen(
+      (events) {
+        _events = events;
+        notifyListeners();
+        setBusy(false);
+      },
+      onError: (error) {
+        setError(error.toString());
+        setBusy(false);
+      },
+    );
+    log.t("subscribeToEvents() end of listening to the stream: ${_subscription == null}");
+  }
+
+  Future<void> refreshEvents() async {
+    log.t("Call to refreshEvents() with subscription valued at $_subscription");
+    _subscribeToEvents();
+  }
+
+  @override
+  void dispose() {
+    log.t("Subscription is about to be called and might be null : ${_subscription == null}");
+    _subscription?.cancel();
+    super.dispose();
+  }
 }

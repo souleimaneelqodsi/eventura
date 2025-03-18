@@ -166,5 +166,11 @@ class AuthService {
     }
   }
 
-  Future<void> signOut() async {}
+  Future<void> signOut() async {
+    try {
+      await _supabaseAuth.signOut();
+    } catch (error) {
+      rethrow;
+    }
+  }
 }
