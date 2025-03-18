@@ -112,7 +112,7 @@ class AuthService {
     String? lastName,
   }) async {
     try {
-      final response = await _supabaseClient.auth.signUp(
+      final response = await _supabaseAuth.signUp(
         email: email,
         password: password,
       );
@@ -125,6 +125,18 @@ class AuthService {
           firstLogin: true,
         );
         try {
+          final existingUser =
+              await _supabaseClient
+                  .from('users')
+                  .select('user_id')
+                  .eq('email', email)
+                  .maybeSingle();
+
+          if (existingUser != null) {
+            var e = Exception("Email already in use.");
+            logger.e("Error: email already in use", error: e);
+            throw e;
+          }
           final user = await createUser(newUser);
           return user;
         } catch (error) {
@@ -158,10 +170,10 @@ class AuthService {
         );
       }
     } on AuthException catch (error) {
-      logger.e("Auth Error while logging in the user.", error:error);
+      logger.e("Auth Error while logging in the user.", error: error);
       throw Exception(error.message);
     } catch (error) {
-      logger.e("Unknown error during log in.", error:error);
+      logger.e("Unknown error during log in.", error: error);
       throw Exception("Failed to login: ${error.toString()}");
     }
   }
