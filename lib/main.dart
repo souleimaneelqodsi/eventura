@@ -1,4 +1,3 @@
-//import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/providers.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
@@ -20,68 +19,73 @@ import 'package:eventura/ui/views/friends_view.dart';
 import 'package:eventura/ui/views/messages_view.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:eventura/ui/views/settings_view.dart';
+import 'package:flutter/services.dart';
 
+final supabase = Supabase.instance.client;
 
-  final supabase = Supabase.instance.client;
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
 
-  Future<void> main() async {
-    WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
+  final supabaseUrl = dotenv.env['SUPABASE_URL'];
+  final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
 
-    final supabaseUrl = dotenv.env['SUPABASE_URL'];
-    final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
+  await Supabase.initialize(url: supabaseUrl!, anonKey: supabaseKey!);
 
-    await Supabase.initialize(
-      url: supabaseUrl!,
-      anonKey: supabaseKey!,
-    );
-    runApp(
-      MultiProvider(
-        providers: providers,
-        child: const MyApp(),
-      ),
-    );
-  }
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
+  runApp(MultiProvider(providers: providers, child: const Eventura()));
+}
 
-  class MyApp extends StatelessWidget {
-    const MyApp({super.key});
+class Eventura extends StatelessWidget {
+  const Eventura({super.key});
 
-    @override
-    Widget build(BuildContext context) {
-      return MaterialApp(
-        title: 'Eventura',
-        theme: AppTheme().light,
-        initialRoute: '/', 
-        routes: {
-          '/': (context) => const AuthWrapper(),
-          '/login': (context) => LoginView(),
-          '/signup': (context) => SignupView(),
-          '/reset_password': (context) => ResetPasswordView(),
-          '/welcome' : (context) => WelcomeView(),
-          '/home': (context) => HomepageView(), 
-          '/create_event': (context) => CreateEventView(),
-          '/event_detail': (context) {
-            final args = ModalRoute.of(context)!.settings.arguments;
-            final eventId = args as int?; 
-            if (eventId == null) {
-                return const Scaffold(body: Center(child: Text("Error: No Event ID")));
-            }
-            return EventDetailView(eventId: eventId);
-          },
-          '/friends': (context) => FriendsView(),
-          '/messages': (context) => MessagesView(), 
-          '/profile': (context) {
-              final args = ModalRoute.of(context)!.settings.arguments;
-              final userId = args as String?;
-
-              return ProfileView(userId: userId ?? supabase.auth.currentUser!.id);
-          },
-          '/settings': (context) => SettingsView(),
-          '/about': (context) => AboutUs(),
-          '/contact': (context) => ContactUs(),
-          '/faq': (context) => FAQ(),
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Eventura',
+      theme: AppTheme().light,
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const AuthWrapper(),
+        '/login': (context) => LoginView(),
+        '/signup': (context) => SignupView(),
+        '/reset_password': (context) => ResetPasswordView(),
+        '/welcome': (context) => WelcomeView(),
+        '/home': (context) => HomepageView(),
+        '/create_event': (context) => CreateEventView(),
+        '/event_detail': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          final eventId = args as int?;
+          if (eventId == null) {
+            return Scaffold(
+              appBar: AppBar(title: Text("Error")),
+              body: Center(
+                child: Text(
+                  "Error: No Event ID",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            );
+          }
+          return EventDetailView(eventId: eventId);
         },
-      );
-    }
+        '/friends': (context) => FriendsView(),
+        '/messages': (context) => MessagesView(),
+        '/profile': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments;
+          final userId = args as String?;
+
+          return ProfileView(userId: userId ?? supabase.auth.currentUser!.id);
+        },
+        '/settings': (context) => SettingsView(),
+        '/about': (context) => AboutUs(),
+        '/contact': (context) => ContactUs(),
+        '/faq': (context) => FAQ(),
+      },
+    );
   }
+}

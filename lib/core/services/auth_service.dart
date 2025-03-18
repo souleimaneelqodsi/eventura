@@ -158,10 +158,10 @@ class AuthService {
         );
       }
     } on AuthException catch (error) {
-      logger.e("Auth Error while logging in the user.");
+      logger.e("Auth Error while logging in the user.", error:error);
       throw Exception(error.message);
     } catch (error) {
-      logger.e("Unknown error during log in.");
+      logger.e("Unknown error during log in.", error:error);
       throw Exception("Failed to login: ${error.toString()}");
     }
   }

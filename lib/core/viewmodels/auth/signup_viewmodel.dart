@@ -7,7 +7,8 @@ class SignupViewmodel extends BaseViewmodel {
 
   SignupViewmodel({required this.authService});
 
-  Future<void> signUp(BuildContext context,{
+  Future<void> signUp(
+    BuildContext context, {
     required String email,
     required String password,
     String? firstName,
