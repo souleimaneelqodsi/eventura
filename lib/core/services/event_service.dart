@@ -20,19 +20,28 @@ class EventService {
           .eq('event_id', eventId);
 
       // ignore: unnecessary_type_check
-      if ((response is List && response.isEmpty) || response == null) {
+      if (response == null) {
         String msg = "Aucun événement trouvé avec l'ID $eventId.";
         log.i(msg);
         throw Exception(msg);
       }
-
-      if (response is Map) {
-        return Event.fromJson(response as Map<String, dynamic>);
-      } else {
-        // ignore: unnecessary_type_check
-        if (response is List) {
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          String msg = "Aucun événement trouvé avec l'ID $eventId.";
+          log.i(msg);
+          throw Exception(msg);
+        } else {
           return Event.fromJson(response[0]);
         }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          String msg = "Aucun événement trouvé avec l'ID $eventId.";
+          log.i(msg);
+          throw Exception(msg);
+        }
+        return Event.fromJson(response as Map<String, dynamic>);
+      } else {
         String msg = "Erreur inconnue, reponse est de type inconnu";
         log.i(msg);
         throw Exception(msg);
@@ -63,15 +72,29 @@ class EventService {
   Future<Event?> createEvent(Event event) async {
     try {
       final response =
-          await _supabaseClient
-              .from('events')
-              .insert(event.toJson())
-              .select()
-              .single();
-      if (response != null) {
-        return Event.fromJson(response);
+          await _supabaseClient.from('events').insert(event.toJson()).select();
+      //.single();
+      if (response == null) {
+        throw Exception("Couldn't create the event. DB response was null.");
       }
-      return null;
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          throw Exception("Couldn't create the event. DB response was empty.");
+        } else {
+          return Event.fromJson(response[0]);
+        }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          throw Exception("Couldn't create the event. DB response was empty.");
+        } else {
+          return Event.fromJson(response as Map<String, dynamic>);
+        }
+      } else {
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        log.i(msg);
+        throw Exception(msg);
+      }
     } catch (error) {
       log.e("Error creating event", error: error);
       rethrow;
@@ -91,14 +114,35 @@ class EventService {
               .from('events')
               .update(event.toJson())
               .eq('event_id', event.eventId!)
-              .select()
-              .single();
+              .select();
+      //.single();
       if (response == null) {
         throw Exception(
           "Event update failed: could not write to the database.",
         );
       }
-      return Event.fromJson(response);
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          throw Exception(
+            "Event update failed: could not write to the database.",
+          );
+        } else {
+          return Event.fromJson(response[0]);
+        }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          throw Exception(
+            "Event update failed: could not write to the database.",
+          );
+        } else {
+          return Event.fromJson(response as Map<String, dynamic>);
+        }
+      } else {
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        log.i(msg);
+        throw Exception(msg);
+      }
     } catch (e) {
       log.e("Erreur lors de la mise à jour de l'événement", error: e);
       rethrow;

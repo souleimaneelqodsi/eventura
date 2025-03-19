@@ -21,15 +21,29 @@ class AuthService {
   Future<UserModel?> createUser(UserModel user) async {
     try {
       final response =
-          await _supabaseClient
-              .from('users')
-              .insert(user.toJson())
-              .select()
-              .single();
+          await _supabaseClient.from('users').insert(user.toJson()).select();
+      //.single();
       if (response == null) {
         throw Exception("User creation failed: no data returned");
       }
-      return UserModel.fromJson(response);
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          throw Exception("User creation failed: no data returned");
+        } else {
+          return UserModel.fromJson(response[0]);
+        }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          throw Exception("User creation failed: no data returned");
+        } else {
+          return UserModel.fromJson(response as Map<String, dynamic>);
+        }
+      } else {
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        logger.i(msg);
+        throw Exception(msg);
+      }
     } catch (error) {
       logger.e("Error creating user", error: error);
       rethrow;
@@ -58,14 +72,35 @@ class AuthService {
               .from('users')
               .update(user.toJson())
               .eq('user_id', user.userId)
-              .select()
-              .single();
+              .select();
+      //.single();
       if (response == null) {
         throw Exception(
           "User creation failed: user not found/data not returned",
         );
       }
-      return UserModel.fromJson(response);
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          throw Exception(
+            "User creation failed: user not found/data not returned",
+          );
+        } else {
+          return UserModel.fromJson(response[0]);
+        }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          throw Exception(
+            "User creation failed: user not found/data not returned",
+          );
+        } else {
+          return UserModel.fromJson(response as Map<String, dynamic>);
+        }
+      } else {
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        logger.i(msg);
+        throw Exception(msg);
+      }
     } catch (error) {
       logger.e(
         "Une erreur s'est produite lors de la mise à jour de l'utilisateur",
@@ -121,7 +156,8 @@ class AuthService {
                   .eq('email', email)
                   .maybeSingle();
 
-          if (existingUser != null || ((existingUser ?? []) as List).isNotEmpty) {
+          if (existingUser != null ||
+              ((existingUser ?? []) as List).isNotEmpty) {
             var e = Exception("Email already in use.");
             logger.e("Error: email already in use", error: e);
             throw e;
