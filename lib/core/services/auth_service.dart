@@ -14,19 +14,6 @@ class AuthService {
 
   final logger = Logger();
 
-
-  Future<void> resetPassword(String email) async {
-    try {
-      // Appel de la méthode resetPasswordForEmail() du client GoTrue
-      await _supabaseClient.resetPasswordForEmail(email);
-      print("E-mail de réinitialisation du mot de passe envoyé avec succès.");
-    } catch (error) {
-      print("Erreur lors de la réinitialisation du mot de passe : $error");
-      throw error;
-    }
-  
-  }
-
   User? get currentUser => _supabaseAuth.currentUser;
 
   // CRUD operations: Create, Read, Update, Delete
@@ -134,7 +121,7 @@ class AuthService {
                   .eq('email', email)
                   .maybeSingle();
 
-          if (existingUser != null) {
+          if (existingUser != null || ((existingUser ?? []) as List).isNotEmpty) {
             var e = Exception("Email already in use.");
             logger.e("Error: email already in use", error: e);
             throw e;
@@ -184,6 +171,38 @@ class AuthService {
     try {
       await _supabaseAuth.signOut();
     } catch (error) {
+      logger.e("Erreur lors de la déconnexion.", error: error);
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      final existingUser =
+          await _supabaseClient
+              .from('users')
+              .select('user_id')
+              .eq('email', email)
+              .maybeSingle();
+      if (existingUser == null || existingUser.isEmpty) {
+        var exception = Exception(
+          "The e-mail entered doesn't belong to any existing account. Please verify your e-mail and try again.",
+        );
+        logger.e(
+          "The user has entered an inexsiting email for password reset.",
+          error: exception,
+        );
+        throw exception;
+      }
+      await _supabaseAuth.resetPasswordForEmail(email);
+      logger.t(
+        "E-mail de réinitialisation du mot de passe envoyé avec succès.",
+      );
+    } catch (error) {
+      logger.e(
+        "Erreur lors de la réinitialisation du mot de passe.",
+        error: error,
+      );
       rethrow;
     }
   }

@@ -41,7 +41,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                         onChanged: (value) => title = value,
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(labelText: "Description"),
+                        decoration: const InputDecoration(
+                          labelText: "Description",
+                        ),
                         onChanged: (value) => description = value,
                       ),
                       TextFormField(
@@ -49,7 +51,9 @@ class _CreateEventViewState extends State<CreateEventView> {
                         onChanged: (value) => location = value,
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(labelText: "Capacité"),
+                        decoration: const InputDecoration(
+                          labelText: "Capacité",
+                        ),
                         keyboardType: TextInputType.number,
                         onChanged: (value) => capacity = int.parse(value),
                       ),
@@ -76,23 +80,28 @@ class _CreateEventViewState extends State<CreateEventView> {
                               isPrivate: isPrivate,
                             );
                             await vmodel.createEvent(context, event);
-                            if (vmodel.hasError && context.mounted) {
+                            if (!vmodel.hasError && context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Évènement créé avec succès!"),
+                                ),
+                              );
+                            } else if (vmodel.hasError && context.mounted) {
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
-                                builder:
-                                    (_) => AlertDialog(
-                                      actions: [
-                                        FloatingActionButton(
-                                          onPressed: () => Navigator.pop(context),
-                                          child: Text("OK"),
-                                        ),
-                                      ],
-                                      content: Text(
-                                        "Une erreur s'est produite lors de la création de l'évènement : ${vmodel.errorMessage}",
-                                      ),
-                                      title: Text("Erreur"),
+                                builder: (_) => AlertDialog(
+                                  title: const Text("Erreur"),
+                                  content: Text(
+                                    "Une erreur s'est produite lors de la création de l'évènement : ${vmodel.errorMessage}",
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("OK"),
                                     ),
+                                  ],
+                                ),
                               );
                             }
                           }
@@ -102,7 +111,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 ? CircularProgressIndicator()
                                 : Text("Créer"),
                       ),
-                      SizedBox(height: 40,),
+                      SizedBox(height: 40),
                     ],
                   ),
                 ),

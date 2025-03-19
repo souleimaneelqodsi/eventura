@@ -1,5 +1,6 @@
 // providers.dart
 import 'package:eventura/core/services/message_service.dart';
+import 'package:eventura/core/viewmodels/auth/reset_password_viewmodel.dart';
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
@@ -33,6 +34,11 @@ List<SingleChildWidget> providers = [
   ChangeNotifierProvider<SignupViewmodel>(
     create:
         (context) => SignupViewmodel(authService: context.read<AuthService>()),
+  ),
+  ChangeNotifierProvider<ResetPasswordViewmodel>(
+    create:
+        (context) =>
+            ResetPasswordViewmodel(authService: context.read<AuthService>()),
   ),
 
   ChangeNotifierProvider<EventListViewmodel>(
@@ -68,5 +74,4 @@ List<SingleChildWidget> providers = [
           userId: '',
         ), // Provide necessary dependencies
   ),
-  
 ];
