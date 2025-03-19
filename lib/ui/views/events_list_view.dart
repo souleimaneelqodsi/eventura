@@ -28,13 +28,26 @@ class EventListViewState extends State<EventListView> {
       ),
       body: Consumer<EventListViewmodel>(
         builder: (context, vmodel, child) {
-          // ... (keep your existing condition checks for isBusy, hasError, etc.)
-
-          // Corrected section for the ListView
+          if (vmodel.hasError) {
+            return Center(
+              child: Text(
+                "Erreur: ${vmodel.errorMessage!}",
+                style: TextStyle(color: Colors.red),
+              ),
+            );
+          }
+          if (vmodel.events.isEmpty) {
+            return Center(
+              child: Text(
+                "Aucun évènement trouvé",
+                style: TextStyle(fontSize: 17),
+              ),
+            );
+          }
           return RefreshIndicator(
             onRefresh: () => vmodel.refreshEvents(),
             child: ListView.builder(
-              padding: const EdgeInsets.all(16.0), // Apply padding here
+              padding: const EdgeInsets.all(16.0),
               itemCount: vmodel.events.length,
               itemBuilder: (context, index) {
                 final event = vmodel.events[index];

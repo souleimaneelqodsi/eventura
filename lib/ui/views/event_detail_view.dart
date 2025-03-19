@@ -112,6 +112,18 @@ class EventDetailView extends StatelessWidget {
                                         vmodel.event!.eventId!,
                                       );
                                       if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content:
+                                                vmodel.hasError
+                                                    ? Text(vmodel.errorMessage!)
+                                                    : Text(
+                                                      "Évènement supprimé avec succès",
+                                                    ),
+                                          ),
+                                        );
                                         Navigator.pop(context);
                                       }
                                     },
