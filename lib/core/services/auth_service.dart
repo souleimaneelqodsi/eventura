@@ -155,13 +155,15 @@ class AuthService {
                   .select('user_id')
                   .eq('email', email)
                   .maybeSingle();
-
-          if (existingUser != null ||
-              ((existingUser ?? []) as List).isNotEmpty) {
-            var e = Exception("Email already in use.");
-            logger.e("Error: email already in use", error: e);
-            throw e;
+                  
+          if (existingUser != null) {
+            if (existingUser.isEmpty) {
+              var e = Exception("Email already in use.");
+              logger.e("Error: email already in use", error: e);
+              throw e;
+            }
           }
+
           final user = await createUser(newUser);
           return user;
         } catch (error) {
