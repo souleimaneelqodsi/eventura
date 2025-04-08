@@ -1,9 +1,9 @@
 import 'package:eventura/core/viewmodels/auth/signup_viewmodel.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
+//import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
-import 'dart:io';
+//import 'dart:io';
 
 class SignupView extends StatelessWidget {
   final _emailController = TextEditingController();
