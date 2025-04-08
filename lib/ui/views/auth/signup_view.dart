@@ -148,7 +148,8 @@ class SignupView extends StatelessWidget {
 
   void _showConfirmationDialog(BuildContext context) {
     final dialog =
-        Platform.isIOS
+    // code à décommenter en cas d'exécution sur appareil mobile
+    /* Platform.isIOS
             ? CupertinoAlertDialog(
               title: const Text("Email confirmation"),
               content: const Text(
@@ -161,27 +162,27 @@ class SignupView extends StatelessWidget {
                       () => Navigator.pushReplacementNamed(context, "/login"),
                 ),
               ],
-            )
-            : AlertDialog(
-              title: const Text("Email confirmation"),
-              content: const Text(
-                "Please confirm your email using the link we've sent you. You're going to be redirected to the sign in page.",
-              ),
-              actions: [
-                ElevatedButton(
-                  child: const Text("OK"),
-                  onPressed:
-                      () => Navigator.pushReplacementNamed(context, "/login"),
-                ),
-              ],
-            );
-
-    Platform.isAndroid
-        ? showDialog(
-          context: context,
-          builder: (_) => dialog,
-          barrierDismissible: false,
-        )
-        : showCupertinoDialog(context: context, builder: (_) => dialog);
+            ):*/
+    AlertDialog(
+      title: const Text("Email confirmation"),
+      content: const Text(
+        "Please confirm your email using the link we've sent you. You're going to be redirected to the sign in page.",
+      ),
+      actions: [
+        ElevatedButton(
+          child: const Text("OK"),
+          onPressed: () => Navigator.pushReplacementNamed(context, "/login"),
+        ),
+      ],
+    );
+    // code à décommenter en cas d'exécution sur appareil mobile
+    /*Platform.isAndroid
+    ?
+    showCupertinoDialog(context: context, builder: (_) => dialog) :*/
+    showDialog(
+      context: context,
+      builder: (_) => dialog,
+      barrierDismissible: false,
+    );
   }
 }
