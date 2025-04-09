@@ -4,18 +4,19 @@ import 'package:eventura/core/models/user.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:mock_supabase_http_client/mock_supabase_http_client.dart';
 
+
 void main() {
   late SupabaseClient mockSupabase;
   late MockSupabaseHttpClient mockHttpClient;
 
-  setUpAll(() {
-    mockHttpClient = MockSupabaseHttpClient();
-    mockSupabase = SupabaseClient(
-      'https://mock.supabase.co',
-      'fake_anon_key',
-      httpClient: mockHttpClient,
-    );
-  });
+setUpAll(() {
+  mockHttpClient = MockSupabaseHttpClient();
+  mockSupabase = SupabaseClient(
+    'https://mock.supabase.co',
+    'fake_anon_key',
+    httpClient: mockHttpClient,
+  );
+});
 
   tearDown(() => mockHttpClient.reset());
 

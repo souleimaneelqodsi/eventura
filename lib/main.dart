@@ -2,7 +2,8 @@ import 'package:eventura/providers.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
 import 'package:eventura/ui/static/faq.dart';
-import 'package:eventura/ui/views/events_list_view.dart';
+import 'package:eventura/ui/views/welcome_view.dart';
+import 'package:eventura/ui/widgets/auth_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -12,13 +13,13 @@ import 'package:eventura/ui/views/homepage_view.dart';
 import 'package:eventura/ui/views/auth/signup_view.dart';
 import 'package:eventura/ui/views/auth/reset_password_view.dart';
 import 'package:eventura/ui/shared/app_theme.dart';
-import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/ui/views/create_event_view.dart';
 import 'package:eventura/ui/views/event_detail_view.dart';
 import 'package:eventura/ui/views/friends_view.dart';
 import 'package:eventura/ui/views/messages_view.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:eventura/ui/views/settings_view.dart';
+import 'package:flutter/services.dart';
 
 final supabase = Supabase.instance.client;
 
@@ -30,32 +31,44 @@ Future<void> main() async {
   final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
 
   await Supabase.initialize(url: supabaseUrl!, anonKey: supabaseKey!);
-  runApp(MultiProvider(providers: providers, child: const MyApp()));
+
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(MultiProvider(providers: providers, child: const Eventura()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Eventura extends StatelessWidget {
+  const Eventura({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Eventura',
-      theme: AppTheme.lightTheme,
+      theme: AppTheme().light,
       initialRoute: '/',
       routes: {
-        '/': (context) => AuthWrapper(),
+        '/': (context) => const AuthWrapper(),
         '/login': (context) => LoginView(),
         '/signup': (context) => SignupView(),
         '/reset_password': (context) => ResetPasswordView(),
+        '/welcome': (context) => WelcomeView(),
         '/home': (context) => HomepageView(),
-        '/events': (context) => EventsListView(),
         '/create_event': (context) => CreateEventView(),
         '/event_detail': (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
           final eventId = args as int?;
           if (eventId == null) {
-            return const Scaffold(
-              body: Center(child: Text("Error: No Event ID")),
+            return Scaffold(
+              appBar: AppBar(title: Text("Error")),
+              body: Center(
+                child: Text(
+                  "Error: No Event ID",
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             );
           }
           return EventDetailView(eventId: eventId);
@@ -72,35 +85,6 @@ class MyApp extends StatelessWidget {
         '/about': (context) => AboutUs(),
         '/contact': (context) => ContactUs(),
         '/faq': (context) => FAQ(),
-      },
-    );
-  }
-}
-
-class AuthWrapper extends StatelessWidget {
-  const AuthWrapper({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    Provider.of<AuthService>(context);
-    final supabaseClient = Supabase.instance.client;
-
-    return StreamBuilder<User?>(
-      stream: supabaseClient.auth.onAuthStateChange.map(
-        (event) => event.session?.user,
-      ),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasData) {
-          return HomepageView();
-        } else {
-          return LoginView();
-        }
       },
     );
   }
