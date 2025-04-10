@@ -62,6 +62,7 @@ List<SingleChildWidget> providers = [
           messageService: context.read<MessageService>(),
         ),
   ),
+  // ChangeNotifierProvider<MessageViewmodel>(
 
   ChangeNotifierProvider<SettingsViewmodel>(
     create: (context) => SettingsViewmodel(),

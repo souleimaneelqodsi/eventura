@@ -1,3 +1,4 @@
+import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
 import 'package:eventura/providers.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
@@ -29,7 +30,6 @@ Future<void> main() async {
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
-
   await Supabase.initialize(url: supabaseUrl!, anonKey: supabaseKey!);
 
   await SystemChrome.setPreferredOrientations([
@@ -37,7 +37,17 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  runApp(MultiProvider(providers: providers, child: const Eventura()));
+  runApp(
+    MultiProvider(
+      providers: [
+        ...providers,
+        ChangeNotifierProvider<SettingsViewmodel>(
+          create: (_) => SettingsViewmodel()..loadSettings(),
+        ),
+      ],
+      child: const Eventura(),
+    ),
+  );
 }
 
 class Eventura extends StatelessWidget {
@@ -45,46 +55,53 @@ class Eventura extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Eventura',
-      theme: AppTheme().light,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const AuthWrapper(),
-        '/login': (context) => LoginView(),
-        '/signup': (context) => SignupView(),
-        '/reset_password': (context) => ResetPasswordView(),
-        '/welcome': (context) => WelcomeView(),
-        '/home': (context) => HomepageView(),
-        '/create_event': (context) => CreateEventView(),
-        '/event_detail': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          final eventId = args as int?;
-          if (eventId == null) {
-            return Scaffold(
-              appBar: AppBar(title: Text("Error")),
-              body: Center(
-                child: Text(
-                  "Error: No Event ID",
-                  style: TextStyle(color: Colors.red),
-                ),
-              ),
-            );
-          }
-          return EventDetailView(eventId: eventId);
-        },
-        '/friends': (context) => FriendsView(),
-        '/messages': (context) => MessagesView(),
-        '/profile': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments;
-          final userId = args as String?;
+    return Consumer<SettingsViewmodel>(
+      builder: (context, settingsViewModel, _) {
+        final isLightMode = settingsViewModel.settings?.lightMode ?? true;
 
-          return ProfileView(userId: userId ?? supabase.auth.currentUser!.id);
-        },
-        '/settings': (context) => SettingsView(),
-        '/about': (context) => AboutUs(),
-        '/contact': (context) => ContactUs(),
-        '/faq': (context) => FAQ(),
+        return MaterialApp(
+          title: 'Eventura',
+          theme: AppTheme().light,
+          darkTheme: AppTheme().dark,
+          themeMode: isLightMode ? ThemeMode.light : ThemeMode.dark,
+          initialRoute: '/',
+          routes: {
+            '/': (context) => const AuthWrapper(),
+            '/login': (context) => LoginView(),
+            '/signup': (context) => SignupView(),
+            '/reset_password': (context) => ResetPasswordView(),
+            '/welcome': (context) => WelcomeView(),
+            '/home': (context) => HomepageView(),
+            '/create_event': (context) => CreateEventView(),
+            '/event_detail': (context) {
+              final args = ModalRoute.of(context)!.settings.arguments;
+              final eventId = args as int?;
+              if (eventId == null) {
+                return Scaffold(
+                  appBar: AppBar(title: Text("Error")),
+                  body: Center(
+                    child: Text(
+                      "Error: No Event ID",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                );
+              }
+              return EventDetailView(eventId: eventId);
+            },
+            '/friends': (context) => FriendsView(),
+            '/messages': (context) => MessagesView(),
+            '/profile': (context) {
+              final args = ModalRoute.of(context)!.settings.arguments;
+              final userId = args as String?;
+              return ProfileView(userId: userId ?? supabase.auth.currentUser!.id);
+            },
+            '/settings': (context) => SettingsView(),
+            '/about': (context) => AboutUs(),
+            '/contact': (context) => ContactUs(),
+            '/faq': (context) => FAQ(),
+          },
+        );
       },
     );
   }
