@@ -21,15 +21,29 @@ class AuthService {
   Future<UserModel?> createUser(UserModel user) async {
     try {
       final response =
-          await _supabaseClient
-              .from('users')
-              .insert(user.toJson())
-              .select()
-              .single();
+          await _supabaseClient.from('users').insert(user.toJson()).select();
+      //.single();
       if (response == null) {
         throw Exception("User creation failed: no data returned");
       }
-      return UserModel.fromJson(response);
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          throw Exception("User creation failed: no data returned");
+        } else {
+          return UserModel.fromJson(response[0]);
+        }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          throw Exception("User creation failed: no data returned");
+        } else {
+          return UserModel.fromJson(response as Map<String, dynamic>);
+        }
+      } else {
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        logger.i(msg);
+        throw Exception(msg);
+      }
     } catch (error) {
       logger.e("Error creating user", error: error);
       rethrow;
@@ -51,17 +65,6 @@ class AuthService {
     }
   }
 
-  Future<bool> isFirstLogin(String userId) async {
-    final UserModel? usr = await getUserById(userId);
-    if (usr == null) {
-      throw Exception(
-        "Une erreur s'est produite ou l'utilisateur n'existe pas.",
-      );
-    } else {
-      return usr.firstLogin ?? false;
-    }
-  }
-
   Future<UserModel?> updateUser(UserModel user) async {
     try {
       final response =
@@ -69,14 +72,35 @@ class AuthService {
               .from('users')
               .update(user.toJson())
               .eq('user_id', user.userId)
-              .select()
-              .single();
+              .select();
+      //.single();
       if (response == null) {
         throw Exception(
           "User creation failed: user not found/data not returned",
         );
       }
-      return UserModel.fromJson(response);
+      // ignore: unnecessary_type_check
+      if (response is List) {
+        if (response.isEmpty) {
+          throw Exception(
+            "User creation failed: user not found/data not returned",
+          );
+        } else {
+          return UserModel.fromJson(response[0]);
+        }
+      } else if (response is Map) {
+        if (response.isEmpty) {
+          throw Exception(
+            "User creation failed: user not found/data not returned",
+          );
+        } else {
+          return UserModel.fromJson(response as Map<String, dynamic>);
+        }
+      } else {
+        String msg = "Erreur inconnue, reponse est de type inconnu";
+        logger.i(msg);
+        throw Exception(msg);
+      }
     } catch (error) {
       logger.e(
         "Une erreur s'est produite lors de la mise à jour de l'utilisateur",
@@ -112,7 +136,7 @@ class AuthService {
     String? lastName,
   }) async {
     try {
-      final response = await _supabaseClient.auth.signUp(
+      final response = await _supabaseAuth.signUp(
         email: email,
         password: password,
       );
@@ -125,6 +149,21 @@ class AuthService {
           firstLogin: true,
         );
         try {
+          final existingUser =
+              await _supabaseClient
+                  .from('users')
+                  .select('user_id')
+                  .eq('email', email)
+                  .maybeSingle();
+                  
+          if (existingUser != null) {
+            if (existingUser.isEmpty) {
+              var e = Exception("Email already in use.");
+              logger.e("Error: email already in use", error: e);
+              throw e;
+            }
+          }
+
           final user = await createUser(newUser);
           return user;
         } catch (error) {
@@ -158,13 +197,51 @@ class AuthService {
         );
       }
     } on AuthException catch (error) {
-      logger.e("Auth Error while logging in the user.");
+      logger.e("Auth Error while logging in the user.", error: error);
       throw Exception(error.message);
     } catch (error) {
-      logger.e("Unknown error during log in.");
+      logger.e("Unknown error during log in.", error: error);
       throw Exception("Failed to login: ${error.toString()}");
     }
   }
 
-  Future<void> signOut() async {}
+  Future<void> signOut() async {
+    try {
+      await _supabaseAuth.signOut();
+    } catch (error) {
+      logger.e("Erreur lors de la déconnexion.", error: error);
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      final existingUser =
+          await _supabaseClient
+              .from('users')
+              .select('user_id')
+              .eq('email', email)
+              .maybeSingle();
+      if (existingUser == null || existingUser.isEmpty) {
+        var exception = Exception(
+          "The e-mail entered doesn't belong to any existing account. Please verify your e-mail and try again.",
+        );
+        logger.e(
+          "The user has entered an inexsiting email for password reset.",
+          error: exception,
+        );
+        throw exception;
+      }
+      await _supabaseAuth.resetPasswordForEmail(email);
+      logger.t(
+        "E-mail de réinitialisation du mot de passe envoyé avec succès.",
+      );
+    } catch (error) {
+      logger.e(
+        "Erreur lors de la réinitialisation du mot de passe.",
+        error: error,
+      );
+      rethrow;
+    }
+  }
 }

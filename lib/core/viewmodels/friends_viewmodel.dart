@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 import 'package:eventura/core/services/friend_service.dart';
 
-class FriendsViewmodel extends BaseViewModel {
+class FriendsViewmodel extends BaseViewmodel {
   FriendsViewmodel({required this.friendService});
 
   final FriendService friendService;
