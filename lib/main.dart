@@ -2,6 +2,7 @@ import 'package:eventura/providers.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
 import 'package:eventura/ui/static/faq.dart';
+import 'package:eventura/ui/views/events_list_view.dart';
 import 'package:eventura/ui/views/welcome_view.dart';
 import 'package:eventura/ui/widgets/auth_wrapper.dart';
 import 'package:flutter/material.dart';
@@ -85,6 +86,7 @@ class Eventura extends StatelessWidget {
         '/about': (context) => AboutUs(),
         '/contact': (context) => ContactUs(),
         '/faq': (context) => FAQ(),
+        '/events_list': (context) => EventListView(),
       },
     );
   }

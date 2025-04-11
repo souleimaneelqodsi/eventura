@@ -62,8 +62,16 @@ class _CreateEventViewState extends State<CreateEventView> {
                         value: isPrivate,
                         onChanged: (value) => setState(() => isPrivate = value),
                       ),
-                      Container(),
+                      Container(height: 16),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 18,
+                            horizontal: 27,
+                          ),
+                        ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             final event = Event(
@@ -90,18 +98,20 @@ class _CreateEventViewState extends State<CreateEventView> {
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
-                                builder: (_) => AlertDialog(
-                                  title: const Text("Erreur"),
-                                  content: Text(
-                                    "Une erreur s'est produite lors de la création de l'évènement : ${vmodel.errorMessage}",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("OK"),
+                                builder:
+                                    (_) => AlertDialog(
+                                      title: const Text("Erreur"),
+                                      content: Text(
+                                        "Une erreur s'est produite lors de la création de l'évènement : ${vmodel.errorMessage}",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () => Navigator.pop(context),
+                                          child: const Text("OK"),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
                               );
                             }
                           }
@@ -109,7 +119,10 @@ class _CreateEventViewState extends State<CreateEventView> {
                         child:
                             vmodel.isBusy
                                 ? CircularProgressIndicator()
-                                : Text("Créer"),
+                                : Text(
+                                  "Créer",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                       ),
                       SizedBox(height: 40),
                     ],
