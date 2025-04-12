@@ -1,6 +1,6 @@
+import 'package:eventura/core/viewmodels/auth/reset_password_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/core/viewmodels/auth/reset_password_viewmodel.dart';
 
 class ResetPasswordView extends StatefulWidget {
   const ResetPasswordView({super.key});
@@ -15,10 +15,7 @@ class ResetPasswordViewState extends State<ResetPasswordView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Réinitialisation du mot de passe"),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: Text("Password Reset"), centerTitle: true),
       body: Consumer<ResetPasswordViewmodel>(
         builder: (context, vmodel, _) {
           return Padding(
@@ -27,7 +24,7 @@ class ResetPasswordViewState extends State<ResetPasswordView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Entrez votre e-mail pour réinitialiser votre mot de passe.",
+                  "Enter your email to reset your password.",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
@@ -60,18 +57,14 @@ class ResetPasswordViewState extends State<ResetPasswordView> {
                           if (!vmodel.hasError) {
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "E-mail de réinitialisation envoyé !",
-                                  ),
-                                ),
+                                SnackBar(content: Text("Reset email sent!")),
                               );
                               Navigator.pushReplacementNamed(context, '/login');
                             }
                           }
                         }
                       },
-                      child: Text("Envoyer"),
+                      child: Text("Send"),
                     ),
               ],
             ),

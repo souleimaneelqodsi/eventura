@@ -1,5 +1,6 @@
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/ui/views/events_list_view.dart';
+import 'package:eventura/ui/views/friends_view.dart';
 import 'package:eventura/ui/views/messages_view.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +14,14 @@ class HomepageView extends StatefulWidget {
 }
 
 class _HomepageViewState extends State<HomepageView> {
+  final friendsView = FriendsView();
   int _eventTypeIndex = 1;
   int currentPageIndex = 0;
   // ignore: prefer_function_declarations_over_variables
   final _pressedStyle =
       (int i, int currentPage) => ElevatedButton.styleFrom(
         backgroundColor: currentPage == i ? Colors.purple : null,
-        foregroundColor: currentPage == i ? Colors.white : Colors.purple,
+        foregroundColor: currentPage == i ? Colors.white : Colors.black,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       );
 
@@ -28,25 +30,29 @@ class _HomepageViewState extends State<HomepageView> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        floatingActionButton: SizedBox(
-          width: 50,
-          height: 50,
-          child: FloatingActionButton(
-            mini: true,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(60)),
-            ),
+        floatingActionButton:
+            currentPageIndex == 0 || currentPageIndex == 1
+                ? SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: FloatingActionButton(
+                    mini: true,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(60)),
+                    ),
 
-            backgroundColor: Colors.purple,
-            child: Icon(Icons.add, color: Colors.white),
-            onPressed: () => Navigator.pushNamed(context, '/create_event'),
-          ),
-        ),
+                    backgroundColor: Colors.purple,
+                    child: Icon(Icons.add, color: Colors.white),
+                    onPressed:
+                        () => Navigator.pushNamed(context, '/create_event'),
+                  ),
+                )
+                : null,
         appBar: AppBar(
           leading: Builder(
             builder:
                 (context) => IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const Icon(Icons.menu, size: 30),
                   onPressed: () {
                     Scaffold.of(context).openDrawer();
                   },
@@ -63,49 +69,117 @@ class _HomepageViewState extends State<HomepageView> {
           ],
         ),
         drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          width: MediaQuery.of(context).size.width * 0.6,
+
+          child: Column(
             children: [
-              SizedBox(
-                height: 125,
-                child: const DrawerHeader(
-                  //decoration: BoxDecoration(color: Colors.blue),
-                  child: Text(
-                    'Menu',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.all(8),
+                  children: [
+                    SizedBox(
+                      height: 125,
+                      child: const DrawerHeader(
+                        //decoration: BoxDecoration(color: Colors.blue),
+                        child: Text(
+                          'Menu',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    ListTile(
+                      title: const Text(
+                        'Home',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/home');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'Settings',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/settings');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'FAQ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/faq');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'About',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/about');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'Contact',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/contact');
+                      },
+                    ),
+                  ],
                 ),
               ),
-              ListTile(
-                title: const Text('Profile'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/profile');
-                },
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Version 1.0.0",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
               ),
-              ListTile(
-                title: const Text('Settings'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/settings');
-                },
-              ),
-              ListTile(
-                title: const Text('FAQ'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/faq');
-                },
-              ),
-              ListTile(
-                title: const Text('About'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/about');
-                },
-              ),
-              ListTile(
-                title: const Text('Contact'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/contact');
-                },
-              ),
+              SizedBox(height: 48.0),
             ],
           ),
         ),
@@ -119,7 +193,7 @@ class _HomepageViewState extends State<HomepageView> {
                       children: [
                         TextField(
                           decoration: InputDecoration(
-                            hintText: 'Rechercher des événements',
+                            hintText: 'Search Events',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
@@ -149,7 +223,7 @@ class _HomepageViewState extends State<HomepageView> {
                                   setState(() => _eventTypeIndex = 2);
                                 },
                                 child: const Text(
-                                  'Événements',
+                                  'Events',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -170,7 +244,6 @@ class _HomepageViewState extends State<HomepageView> {
                       ],
                     ),
                   ),
-                  //if (currentPageIndex == 1)
                   Expanded(
                     child:
                         _eventTypeIndex == 1
@@ -182,6 +255,7 @@ class _HomepageViewState extends State<HomepageView> {
                 ],
               ),
               EventListView(), // favorites
+              friendsView, // friends
               MessagesView(), // messages
               ProfileView(
                 // user's profile
@@ -197,6 +271,10 @@ class _HomepageViewState extends State<HomepageView> {
             NavigationDestination(
               icon: Icon(Icons.favorite),
               label: "Favorites",
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.group_rounded),
+              label: "Friends",
             ),
             NavigationDestination(icon: Icon(Icons.message), label: "Messages"),
             NavigationDestination(

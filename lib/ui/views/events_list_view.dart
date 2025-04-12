@@ -1,9 +1,9 @@
 // events_list_view.dart
 // import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/events_list_viewmodel.dart';
+import 'package:eventura/ui/widgets/event_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/ui/widgets/event_card.dart';
 
 class EventListView extends StatefulWidget {
   const EventListView({super.key});
@@ -20,17 +20,14 @@ class EventListViewState extends State<EventListView> {
         if (vmodel.hasError) {
           return Center(
             child: Text(
-              "Erreur: ${vmodel.errorMessage!}",
+              "Error: ${vmodel.errorMessage!}",
               style: TextStyle(color: Colors.red),
             ),
           );
         }
         if (vmodel.events.isEmpty) {
           return Center(
-            child: Text(
-              "Aucun évènement trouvé",
-              style: TextStyle(fontSize: 17),
-            ),
+            child: Text("No events found", style: TextStyle(fontSize: 17)),
           );
         }
         return RefreshIndicator(
