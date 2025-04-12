@@ -53,3 +53,47 @@ app.*.map.json
 # private files
 ideas.md
 last_checkpoint.md
+
+# Ignore everything
+/*
+
+# But not these files and directories
+!/.github/
+!/lib/
+!/assets/
+!/test/
+!/pubspec.yaml
+!/pubspec.lock
+!/README.md
+!/analysis_options.yaml
+!/devtools_options.yaml
+!/.gitignore
+!/ios/Podfile
+!/ios/Flutter/
+!/android/app/src/
+!/android/gradle/
+!/android/build.gradle
+!/android/gradle.properties
+!/android/settings.gradle
+!/web/favicon.png
+!/web/icons/
+!/web/index.html
+!/web/manifest.json
+!/macos/Podfile
+!/macos/Flutter/
+!/windows/flutter/
+!/linux/flutter/
+
+# Explicitly ignore generated files even in allowed directories
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/.last_build_id
+android/app/src/debug/gen/
+android/app/src/profile/gen/
+android/app/src/release/gen/
+
+# Keep .gitkeep files
+!**/.gitkeep

@@ -1,5 +1,5 @@
-import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 import 'package:eventura/core/services/auth_service.dart';
+import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 import 'package:logger/logger.dart';
 
 class ResetPasswordViewmodel extends BaseViewmodel {

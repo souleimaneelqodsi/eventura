@@ -1,8 +1,8 @@
+import 'package:eventura/core/models/event.dart';
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/core/models/event.dart';
 
 class CreateEventView extends StatefulWidget {
   const CreateEventView({super.key});
@@ -26,7 +26,7 @@ class _CreateEventViewState extends State<CreateEventView> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        appBar: AppBar(title: const Text("Créer un événement")),
+        appBar: AppBar(title: const Text("Create an event")),
         body: Consumer<EventViewmodel>(
           builder: (context, vmodel, child) {
             return Padding(
@@ -37,7 +37,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                   child: Column(
                     children: [
                       TextFormField(
-                        decoration: const InputDecoration(labelText: "Titre"),
+                        decoration: const InputDecoration(labelText: "Title"),
                         onChanged: (value) => title = value,
                       ),
                       TextFormField(
@@ -47,23 +47,33 @@ class _CreateEventViewState extends State<CreateEventView> {
                         onChanged: (value) => description = value,
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(labelText: "Lieu"),
+                        decoration: const InputDecoration(
+                          labelText: "Location",
+                        ),
                         onChanged: (value) => location = value,
                       ),
                       TextFormField(
                         decoration: const InputDecoration(
-                          labelText: "Capacité",
+                          labelText: "Capacity",
                         ),
                         keyboardType: TextInputType.number,
                         onChanged: (value) => capacity = int.parse(value),
                       ),
                       SwitchListTile(
-                        title: const Text("Événement privé"),
+                        title: const Text("Private Event"),
                         value: isPrivate,
                         onChanged: (value) => setState(() => isPrivate = value),
                       ),
-                      Container(),
+                      Container(height: 16),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 18,
+                            horizontal: 27,
+                          ),
+                        ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             final event = Event(
@@ -83,25 +93,27 @@ class _CreateEventViewState extends State<CreateEventView> {
                             if (!vmodel.hasError && context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content: Text("Évènement créé avec succès!"),
+                                  content: Text("Event created successfully!"),
                                 ),
                               );
                             } else if (vmodel.hasError && context.mounted) {
                               showDialog(
                                 context: context,
                                 barrierDismissible: false,
-                                builder: (_) => AlertDialog(
-                                  title: const Text("Erreur"),
-                                  content: Text(
-                                    "Une erreur s'est produite lors de la création de l'évènement : ${vmodel.errorMessage}",
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("OK"),
+                                builder:
+                                    (_) => AlertDialog(
+                                      title: const Text("Error"),
+                                      content: Text(
+                                        "An error occurred while creating the event: ${vmodel.errorMessage}",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () => Navigator.pop(context),
+                                          child: const Text("OK"),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
                               );
                             }
                           }
@@ -109,7 +121,10 @@ class _CreateEventViewState extends State<CreateEventView> {
                         child:
                             vmodel.isBusy
                                 ? CircularProgressIndicator()
-                                : Text("Créer"),
+                                : Text(
+                                  "Create",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
                       ),
                       SizedBox(height: 40),
                     ],

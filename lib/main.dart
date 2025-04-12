@@ -1,27 +1,26 @@
 import 'package:eventura/providers.dart';
+import 'package:eventura/ui/shared/app_theme.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
 import 'package:eventura/ui/static/faq.dart';
-import 'package:eventura/ui/views/welcome_view.dart';
-import 'package:eventura/ui/widgets/auth_wrapper.dart';
-import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
 import 'package:eventura/ui/views/auth/login_view.dart';
-import 'package:eventura/ui/views/homepage_view.dart';
-import 'package:eventura/ui/views/auth/signup_view.dart';
 import 'package:eventura/ui/views/auth/reset_password_view.dart';
-import 'package:eventura/ui/shared/app_theme.dart';
+import 'package:eventura/ui/views/auth/signup_view.dart';
 import 'package:eventura/ui/views/create_event_view.dart';
 import 'package:eventura/ui/views/event_detail_view.dart';
+import 'package:eventura/ui/views/events_list_view.dart';
 import 'package:eventura/ui/views/friends_view.dart';
+import 'package:eventura/ui/views/homepage_view.dart';
 import 'package:eventura/ui/views/messages_view.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:eventura/ui/views/settings_view.dart';
+import 'package:eventura/ui/views/welcome_view.dart';
+import 'package:eventura/ui/widgets/auth_wrapper.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
-final supabase = Supabase.instance.client;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +38,8 @@ Future<void> main() async {
 
   runApp(MultiProvider(providers: providers, child: const Eventura()));
 }
+
+final supabase = Supabase.instance.client;
 
 class Eventura extends StatelessWidget {
   const Eventura({super.key});
@@ -85,6 +86,7 @@ class Eventura extends StatelessWidget {
         '/about': (context) => AboutUs(),
         '/contact': (context) => ContactUs(),
         '/faq': (context) => FAQ(),
+        '/events_list': (context) => EventListView(),
       },
     );
   }
