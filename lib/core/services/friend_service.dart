@@ -13,25 +13,6 @@ class FriendService {
   FriendService({required SupabaseClient supabaseClient})
     : _supabaseClient = supabaseClient;
 
-  Future<FriendshipModel?> sendFriendRequest(
-    String fromUserId,
-    String toUserId,
-  ) async {
-    try {
-      final response =
-          await _supabaseClient.from('friends').insert({
-            'user_id_1': fromUserId,
-            'user_id_2': toUserId,
-            'status': 'pending',
-          }).select();
-
-      return FriendshipModel.fromJson(response.first);
-    } catch (e) {
-      log.e("Error sending friend request: ${e.toString()}", error: e);
-      rethrow;
-    }
-  }
-
   Future<FriendshipModel> acceptFriendRequest(int friendRequestId) async {
     try {
       var response = await _supabaseClient
@@ -57,33 +38,6 @@ class FriendService {
 
       friendship.status = 'accepted';
       return friendship;
-    } catch (e) {
-      log.e(e.toString(), error: e);
-      rethrow;
-    }
-  }
-
-  Future<FriendshipModel> rejectFriendRequest(int friendRequestId) async {
-    try {
-      var response = await _supabaseClient
-          .from('friends')
-          .select()
-          .eq('friendship_id', friendRequestId);
-
-      if (response.isEmpty) {
-        throw Exception("Error accepting the friendship: friendship not found");
-      }
-      if (response.first['status'] != 'pending') {
-        throw Exception(
-          "Error accepting the friendship: friendship already accepted/rejected",
-        );
-      }
-      await _supabaseClient
-          .from('friends')
-          .update({'status': 'rejected'})
-          .eq('friendship_id', friendRequestId);
-
-      return FriendshipModel.fromJson(response.first);
     } catch (e) {
       log.e(e.toString(), error: e);
       rethrow;
@@ -146,6 +100,52 @@ class FriendService {
       return pendingRequests;
     } catch (e) {
       log.e(e.toString(), error: e);
+      rethrow;
+    }
+  }
+
+  Future<FriendshipModel> rejectFriendRequest(int friendRequestId) async {
+    try {
+      var response = await _supabaseClient
+          .from('friends')
+          .select()
+          .eq('friendship_id', friendRequestId);
+
+      if (response.isEmpty) {
+        throw Exception("Error accepting the friendship: friendship not found");
+      }
+      if (response.first['status'] != 'pending') {
+        throw Exception(
+          "Error accepting the friendship: friendship already accepted/rejected",
+        );
+      }
+      await _supabaseClient
+          .from('friends')
+          .update({'status': 'rejected'})
+          .eq('friendship_id', friendRequestId);
+
+      return FriendshipModel.fromJson(response.first);
+    } catch (e) {
+      log.e(e.toString(), error: e);
+      rethrow;
+    }
+  }
+
+  Future<FriendshipModel?> sendFriendRequest(
+    String fromUserId,
+    String toUserId,
+  ) async {
+    try {
+      final response =
+          await _supabaseClient.from('friends').insert({
+            'user_id_1': fromUserId,
+            'user_id_2': toUserId,
+            'status': 'pending',
+          }).select();
+
+      return FriendshipModel.fromJson(response.first);
+    } catch (e) {
+      log.e("Error sending friend request: ${e.toString()}", error: e);
       rethrow;
     }
   }

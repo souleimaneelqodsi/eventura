@@ -1,9 +1,9 @@
 // events_list_view.dart
 // import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/events_list_viewmodel.dart';
+import 'package:eventura/ui/widgets/event_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/ui/widgets/event_card.dart';
 
 class EventListView extends StatefulWidget {
   const EventListView({super.key});

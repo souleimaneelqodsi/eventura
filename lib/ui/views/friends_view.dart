@@ -1,8 +1,8 @@
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
+import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 
 class FriendsView extends StatefulWidget {
   const FriendsView({super.key});
@@ -41,24 +41,6 @@ class _FriendsViewState extends State<FriendsView> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             ));
   };
-
-  @override
-  void initState() {
-    super.initState();
-    _viewModel = Provider.of<FriendsViewmodel>(context, listen: false);
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    var authService = Provider.of<AuthService>(context, listen: false);
-
-    _currentUser =
-        await authService.getUserById(authService.currentUser!.id) as UserModel;
-
-    if (mounted) {
-      await _viewModel.fetchFriendsAndRequests(_currentUser.userId, context);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -430,5 +412,23 @@ class _FriendsViewState extends State<FriendsView> {
         );
       },
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = Provider.of<FriendsViewmodel>(context, listen: false);
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    var authService = Provider.of<AuthService>(context, listen: false);
+
+    _currentUser =
+        await authService.getUserById(authService.currentUser!.id) as UserModel;
+
+    if (mounted) {
+      await _viewModel.fetchFriendsAndRequests(_currentUser.userId, context);
+    }
   }
 }

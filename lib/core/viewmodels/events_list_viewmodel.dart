@@ -11,12 +11,22 @@ class EventListViewmodel extends BaseViewmodel {
   List<Event> _events = [];
   StreamSubscription? _subscription;
 
-  List<Event> get events => _events;
-
   final log = Logger();
 
   EventListViewmodel({required EventService eventService})
     : _eventService = eventService {
+    _subscribeToEvents();
+  }
+
+  List<Event> get events => _events;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  Future<void> refreshEvents() async {
     _subscribeToEvents();
   }
 
@@ -33,15 +43,5 @@ class EventListViewmodel extends BaseViewmodel {
         setBusy(false);
       },
     );
-  }
-
-  Future<void> refreshEvents() async {
-    _subscribeToEvents();
-  }
-
-  @override
-  void dispose() {
-    _subscription?.cancel();
-    super.dispose();
   }
 }

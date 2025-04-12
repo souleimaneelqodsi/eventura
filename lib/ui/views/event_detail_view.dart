@@ -1,6 +1,6 @@
+import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 
 class EventDetailView extends StatelessWidget {
   final int eventId;

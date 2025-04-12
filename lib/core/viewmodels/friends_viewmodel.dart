@@ -1,7 +1,7 @@
 import 'package:eventura/core/models/friends.dart';
 import 'package:eventura/core/models/user.dart';
-import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 import 'package:eventura/core/services/friend_service.dart';
+import 'package:eventura/core/viewmodels/base_viewmodel.dart';
 import 'package:flutter/widgets.dart';
 
 class FriendsViewmodel extends BaseViewmodel {

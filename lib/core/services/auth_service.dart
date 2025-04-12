@@ -1,18 +1,18 @@
 // ignore_for_file: unnecessary_null_comparison
 import 'package:eventura/core/models/user.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:logger/logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthService {
   late final GoTrueClient _supabaseAuth;
   late final SupabaseClient _supabaseClient;
 
+  final logger = Logger();
+
   AuthService({required SupabaseClient supabaseClient}) {
     _supabaseClient = supabaseClient;
     _supabaseAuth = _supabaseClient.auth;
   }
-
-  final logger = Logger();
 
   User? get currentUser => _supabaseAuth.currentUser;
 
@@ -26,6 +26,58 @@ class AuthService {
       return UserModel.fromJson(response.first);
     } catch (error) {
       logger.e("Error creating user", error: error);
+      rethrow;
+    }
+  }
+
+  Future<void> deleteUser(String userId) async {
+    try {
+      await _supabaseClient.from('users').delete().eq('user_id', userId);
+    } catch (error) {
+      logger.e("Error during user deletion.", error: error);
+    }
+  }
+
+  Future<UserModel?> getUserById(String userId) async {
+    try {
+      final response = await _supabaseClient
+          .from('users')
+          .select()
+          .eq('user_id', userId);
+      if (response.isEmpty) {
+        throw Exception(
+          "User retrieval failed: user not found/data not returned",
+        );
+      }
+      return UserModel.fromJson(response.first);
+    } catch (error) {
+      logger.e("Error fetching user by ID", error: error);
+      rethrow;
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      final existingUser =
+          await _supabaseClient
+              .from('users')
+              .select('user_id')
+              .eq('email', email)
+              .maybeSingle();
+      if (existingUser == null || existingUser.isEmpty) {
+        var exception = Exception(
+          "The e-mail entered doesn't belong to any existing account. Please verify your e-mail and try again.",
+        );
+        logger.e(
+          "The user has entered an inexsiting email for password reset.",
+          error: exception,
+        );
+        throw exception;
+      }
+      await _supabaseAuth.resetPasswordForEmail(email);
+      logger.t("Reset email sent successfully.");
+    } catch (error) {
+      logger.e("Error during password reset.", error: error);
       rethrow;
     }
   }
@@ -64,49 +116,32 @@ class AuthService {
     }
   }
 
-  Future<UserModel?> getUserById(String userId) async {
+  Future<void> signIn(String email, String password) async {
     try {
-      final response = await _supabaseClient
-          .from('users')
-          .select()
-          .eq('user_id', userId);
-      if (response.isEmpty) {
+      final response = await _supabaseAuth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      if (response.session == null || response.user == null) {
         throw Exception(
-          "User retrieval failed: user not found/data not returned",
+          "An error occurred while logging in. Please try again or contact support.",
         );
       }
-      return UserModel.fromJson(response.first);
+    } on AuthException catch (error) {
+      logger.e("Auth Error while logging in the user.", error: error);
+      throw Exception(error.message);
     } catch (error) {
-      logger.e("Error fetching user by ID", error: error);
-      rethrow;
+      logger.e("Unknown error during log in.", error: error);
+      throw Exception("Failed to login: ${error.toString()}");
     }
   }
 
-  Future<UserModel?> updateUser(UserModel user) async {
+  Future<void> signOut() async {
     try {
-      final response =
-          await _supabaseClient
-              .from('users')
-              .update(user.toJson())
-              .eq('user_id', user.userId)
-              .select();
-      if (response.isEmpty) {
-        throw Exception(
-          "User creation failed: user not found/data not returned",
-        );
-      }
-      return UserModel.fromJson(response.first);
+      await _supabaseAuth.signOut();
     } catch (error) {
-      logger.e("Error during user update.", error: error);
+      logger.e("Error during log out.", error: error);
       rethrow;
-    }
-  }
-
-  Future<void> deleteUser(String userId) async {
-    try {
-      await _supabaseClient.from('users').delete().eq('user_id', userId);
-    } catch (error) {
-      logger.e("Error during user deletion.", error: error);
     }
   }
 
@@ -166,57 +201,22 @@ class AuthService {
     }
   }
 
-  Future<void> signIn(String email, String password) async {
+  Future<UserModel?> updateUser(UserModel user) async {
     try {
-      final response = await _supabaseAuth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      if (response.session == null || response.user == null) {
-        throw Exception(
-          "An error occurred while logging in. Please try again or contact support.",
-        );
-      }
-    } on AuthException catch (error) {
-      logger.e("Auth Error while logging in the user.", error: error);
-      throw Exception(error.message);
-    } catch (error) {
-      logger.e("Unknown error during log in.", error: error);
-      throw Exception("Failed to login: ${error.toString()}");
-    }
-  }
-
-  Future<void> signOut() async {
-    try {
-      await _supabaseAuth.signOut();
-    } catch (error) {
-      logger.e("Error during log out.", error: error);
-      rethrow;
-    }
-  }
-
-  Future<void> resetPassword(String email) async {
-    try {
-      final existingUser =
+      final response =
           await _supabaseClient
               .from('users')
-              .select('user_id')
-              .eq('email', email)
-              .maybeSingle();
-      if (existingUser == null || existingUser.isEmpty) {
-        var exception = Exception(
-          "The e-mail entered doesn't belong to any existing account. Please verify your e-mail and try again.",
+              .update(user.toJson())
+              .eq('user_id', user.userId)
+              .select();
+      if (response.isEmpty) {
+        throw Exception(
+          "User creation failed: user not found/data not returned",
         );
-        logger.e(
-          "The user has entered an inexsiting email for password reset.",
-          error: exception,
-        );
-        throw exception;
       }
-      await _supabaseAuth.resetPasswordForEmail(email);
-      logger.t("Reset email sent successfully.");
+      return UserModel.fromJson(response.first);
     } catch (error) {
-      logger.e("Error during password reset.", error: error);
+      logger.e("Error during user update.", error: error);
       rethrow;
     }
   }
