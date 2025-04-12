@@ -43,6 +43,24 @@ class _FriendsViewState extends State<FriendsView> {
   };
 
   @override
+  void initState() {
+    super.initState();
+    _viewModel = Provider.of<FriendsViewmodel>(context, listen: false);
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    var authService = Provider.of<AuthService>(context, listen: false);
+
+    _currentUser =
+        await authService.getUserById(authService.currentUser!.id) as UserModel;
+
+    if (mounted) {
+      await _viewModel.fetchFriendsAndRequests(_currentUser.userId, context);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Consumer<FriendsViewmodel>(
       builder: (context, vmodel, child) {
@@ -181,12 +199,6 @@ class _FriendsViewState extends State<FriendsView> {
                                               actions: [
                                                 TextButton(
                                                   onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text('No'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
                                                     _viewModel
                                                         .sendFriendRequest(
                                                           _currentUser.userId,
@@ -205,6 +217,12 @@ class _FriendsViewState extends State<FriendsView> {
                                                     Navigator.pop(context);
                                                   },
                                                   child: Text('Yes'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text('No'),
                                                 ),
                                               ],
                                             ),
@@ -379,6 +397,55 @@ class _FriendsViewState extends State<FriendsView> {
                               for (var friendship in vmodel.friends.keys)
                                 ListTile(
                                   leading: Icon(Icons.account_circle, size: 32),
+                                  trailing: IconButton(
+                                    icon: Icon(Icons.delete, size: 24),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder:
+                                            (context) => AlertDialog(
+                                              actions: [
+                                                TextButton(
+                                                  child:
+                                                      vmodel.isBusy
+                                                          ? CircularProgressIndicator()
+                                                          : Text('Yes'),
+                                                  onPressed: () {
+                                                    vmodel.deleteFriend(
+                                                      friendship,
+                                                    );
+                                                    Navigator.pop(context);
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Friend deleted: ${vmodel.friends[friendship]!.firstName} ${vmodel.friends[friendship]!.lastName}',
+                                                        ),
+                                                      ),
+                                                    );
+                                                    _loadData();
+                                                  },
+                                                ),
+                                                TextButton(
+                                                  child: Text('No'),
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                              ],
+                                              content: Text(
+                                                'Are you sure you want to delete this friend?',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                      );
+                                    },
+                                  ),
                                   title: Text(
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -412,23 +479,5 @@ class _FriendsViewState extends State<FriendsView> {
         );
       },
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _viewModel = Provider.of<FriendsViewmodel>(context, listen: false);
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    var authService = Provider.of<AuthService>(context, listen: false);
-
-    _currentUser =
-        await authService.getUserById(authService.currentUser!.id) as UserModel;
-
-    if (mounted) {
-      await _viewModel.fetchFriendsAndRequests(_currentUser.userId, context);
-    }
   }
 }

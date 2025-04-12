@@ -66,4 +66,15 @@ class FriendsViewmodel extends BaseViewmodel {
       setBusy(false);
     }
   }
+
+  Future<void> deleteFriend(FriendshipModel friendship) async {
+    try {
+      setBusy(true);
+      await friendService.deleteFriend(friendship);
+    } catch (e) {
+      setError(e.toString());
+    } finally {
+      setBusy(false);
+    }
+  }
 }

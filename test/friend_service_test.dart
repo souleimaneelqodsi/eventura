@@ -115,6 +115,81 @@ void main() {
       });
     });
 
+    group('deleteFriend', () {
+      test('successfully deletes friendship when it exists', () async {
+        final testFriendship = Map<String, dynamic>.from(testFriendshipBase)
+          ..['created_at'] = validDateString;
+
+        await mockSupabase.from('friends').insert(testFriendship);
+
+        final friendship = FriendshipModel(
+          friendshipId: 1,
+          userId1: 'user1',
+          userId2: 'user2',
+          status: 'pending',
+          createdAt: validDateString,
+        );
+
+        await friendService.deleteFriend(friendship);
+
+        final afterDelete = await mockSupabase.from('friends').select();
+
+        final hasDeletedFriendship = afterDelete.any(
+          (item) => item['friendship_id'] == 1,
+        );
+        expect(hasDeletedFriendship, isFalse);
+      });
+
+      test('does not throw when deleting non-existent friendship', () async {
+        final nonExistentFriendship = FriendshipModel(
+          friendshipId: 999,
+          userId1: 'user1',
+          userId2: 'user2',
+          status: 'pending',
+          createdAt: validDateString,
+        );
+
+        await expectLater(
+          friendService.deleteFriend(nonExistentFriendship),
+          completes,
+        );
+      });
+
+      test('rethrows exceptions from database operations', () async {
+        mockHttpClient = MockSupabaseHttpClient(
+          postgrestExceptionTrigger: (schema, table, data, type) {
+            if (table == 'friends' && type == RequestType.delete) {
+              throw PostgrestException(
+                message: 'Database error during delete operation',
+                code: '500',
+              );
+            }
+          },
+        );
+
+        mockSupabase = SupabaseClient(
+          'https://mock.supabase.co',
+          'fake_anon_key',
+          httpClient: mockHttpClient,
+        );
+
+        friendService = FriendService(supabaseClient: mockSupabase);
+
+        final friendship = FriendshipModel(
+          friendshipId: 1,
+          userId1: 'user1',
+          userId2: 'user2',
+          status: 'pending',
+          createdAt: validDateString,
+        );
+
+        expect(
+          () => friendService.deleteFriend(friendship),
+          throwsA(isA<PostgrestException>()),
+        );
+      });
+    });
+
     testWidgets('getFriends returns map of friendships and user models', (
       WidgetTester tester,
     ) async {

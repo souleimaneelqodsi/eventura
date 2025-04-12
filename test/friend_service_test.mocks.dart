@@ -54,6 +54,32 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
           as _i4.Future<_i5.UserModel?>);
 
   @override
+  _i4.Future<void> deleteUser(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#deleteUser, [userId]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
+  _i4.Future<_i5.UserModel?> getUserById(String? userId) =>
+      (super.noSuchMethod(
+            Invocation.method(#getUserById, [userId]),
+            returnValue: _i4.Future<_i5.UserModel?>.value(),
+          )
+          as _i4.Future<_i5.UserModel?>);
+
+  @override
+  _i4.Future<void> resetPassword(String? email) =>
+      (super.noSuchMethod(
+            Invocation.method(#resetPassword, [email]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
+          )
+          as _i4.Future<void>);
+
+  @override
   _i4.Future<_i5.UserModel?> searchUser(String? query) =>
       (super.noSuchMethod(
             Invocation.method(#searchUser, [query]),
@@ -72,25 +98,18 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
           as _i4.Future<List<_i5.UserModel>>);
 
   @override
-  _i4.Future<_i5.UserModel?> getUserById(String? userId) =>
+  _i4.Future<void> signIn(String? email, String? password) =>
       (super.noSuchMethod(
-            Invocation.method(#getUserById, [userId]),
-            returnValue: _i4.Future<_i5.UserModel?>.value(),
+            Invocation.method(#signIn, [email, password]),
+            returnValue: _i4.Future<void>.value(),
+            returnValueForMissingStub: _i4.Future<void>.value(),
           )
-          as _i4.Future<_i5.UserModel?>);
+          as _i4.Future<void>);
 
   @override
-  _i4.Future<_i5.UserModel?> updateUser(_i5.UserModel? user) =>
+  _i4.Future<void> signOut() =>
       (super.noSuchMethod(
-            Invocation.method(#updateUser, [user]),
-            returnValue: _i4.Future<_i5.UserModel?>.value(),
-          )
-          as _i4.Future<_i5.UserModel?>);
-
-  @override
-  _i4.Future<void> deleteUser(String? userId) =>
-      (super.noSuchMethod(
-            Invocation.method(#deleteUser, [userId]),
+            Invocation.method(#signOut, []),
             returnValue: _i4.Future<void>.value(),
             returnValueForMissingStub: _i4.Future<void>.value(),
           )
@@ -115,29 +134,10 @@ class MockAuthService extends _i1.Mock implements _i3.AuthService {
           as _i4.Future<_i5.UserModel?>);
 
   @override
-  _i4.Future<void> signIn(String? email, String? password) =>
+  _i4.Future<_i5.UserModel?> updateUser(_i5.UserModel? user) =>
       (super.noSuchMethod(
-            Invocation.method(#signIn, [email, password]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
+            Invocation.method(#updateUser, [user]),
+            returnValue: _i4.Future<_i5.UserModel?>.value(),
           )
-          as _i4.Future<void>);
-
-  @override
-  _i4.Future<void> signOut() =>
-      (super.noSuchMethod(
-            Invocation.method(#signOut, []),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
-
-  @override
-  _i4.Future<void> resetPassword(String? email) =>
-      (super.noSuchMethod(
-            Invocation.method(#resetPassword, [email]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
+          as _i4.Future<_i5.UserModel?>);
 }

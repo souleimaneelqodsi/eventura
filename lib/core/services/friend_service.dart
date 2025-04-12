@@ -149,4 +149,16 @@ class FriendService {
       rethrow;
     }
   }
+
+  Future<void> deleteFriend(FriendshipModel friendship) async {
+    try {
+      await _supabaseClient
+          .from('friends')
+          .delete()
+          .eq('friendship_id', friendship.friendshipId);
+    } catch (e) {
+      log.e("Error deleting friend: ${e.toString()}", error: e);
+      rethrow;
+    }
+  }
 }
