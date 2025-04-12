@@ -19,7 +19,6 @@ class EventService {
           .select()
           .eq('event_id', eventId);
 
-      // ignore: unnecessary_type_check
       if (response == null) {
         String msg = "Aucun événement trouvé avec l'ID $eventId.";
         log.i(msg);

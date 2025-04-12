@@ -55,6 +55,9 @@ class EventDetailView extends StatelessWidget {
                         text: "Lieu",
                         style: TextStyle(
                           decoration: TextDecoration.underline,
+                          decorationThickness: 2,
+                          decorationColor: Colors.black,
+                          height: 1.5,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),
@@ -74,6 +77,8 @@ class EventDetailView extends StatelessWidget {
                         text: "Description",
                         style: TextStyle(
                           decoration: TextDecoration.underline,
+                          decorationThickness: 2,
+                          decorationColor: Colors.black,
                           fontWeight: FontWeight.bold,
                           color: Colors.black,
                         ),

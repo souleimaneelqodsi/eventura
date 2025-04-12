@@ -1,5 +1,6 @@
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/ui/views/events_list_view.dart';
+import 'package:eventura/ui/views/friends_view.dart';
 import 'package:eventura/ui/views/messages_view.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +14,14 @@ class HomepageView extends StatefulWidget {
 }
 
 class _HomepageViewState extends State<HomepageView> {
+  final friendsView = FriendsView();
   int _eventTypeIndex = 1;
   int currentPageIndex = 0;
   // ignore: prefer_function_declarations_over_variables
   final _pressedStyle =
       (int i, int currentPage) => ElevatedButton.styleFrom(
         backgroundColor: currentPage == i ? Colors.purple : null,
-        foregroundColor: currentPage == i ? Colors.white : Colors.purple,
+        foregroundColor: currentPage == i ? Colors.white : Colors.black,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       );
 
@@ -28,20 +30,24 @@ class _HomepageViewState extends State<HomepageView> {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        floatingActionButton: SizedBox(
-          width: 50,
-          height: 50,
-          child: FloatingActionButton(
-            mini: true,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(60)),
-            ),
+        floatingActionButton:
+            currentPageIndex == 0 || currentPageIndex == 1
+                ? SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: FloatingActionButton(
+                    mini: true,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(60)),
+                    ),
 
-            backgroundColor: Colors.purple,
-            child: Icon(Icons.add, color: Colors.white),
-            onPressed: () => Navigator.pushNamed(context, '/create_event'),
-          ),
-        ),
+                    backgroundColor: Colors.purple,
+                    child: Icon(Icons.add, color: Colors.white),
+                    onPressed:
+                        () => Navigator.pushNamed(context, '/create_event'),
+                  ),
+                )
+                : null,
         appBar: AppBar(
           leading: Builder(
             builder:
@@ -182,7 +188,7 @@ class _HomepageViewState extends State<HomepageView> {
                 ],
               ),
               EventListView(), // favorites
-              MessagesView(), // messages
+              friendsView, // messages
               ProfileView(
                 // user's profile
                 userId: Provider.of<AuthService>(context).currentUser!.id,
@@ -198,7 +204,10 @@ class _HomepageViewState extends State<HomepageView> {
               icon: Icon(Icons.favorite),
               label: "Favorites",
             ),
-            NavigationDestination(icon: Icon(Icons.message), label: "Messages"),
+            NavigationDestination(
+              icon: Icon(Icons.group_rounded),
+              label: "Friends",
+            ),
             NavigationDestination(
               icon: Icon(Icons.account_circle),
               label: "Account",
