@@ -20,17 +20,14 @@ class EventListViewState extends State<EventListView> {
         if (vmodel.hasError) {
           return Center(
             child: Text(
-              "Erreur: ${vmodel.errorMessage!}",
+              "Error: ${vmodel.errorMessage!}",
               style: TextStyle(color: Colors.red),
             ),
           );
         }
         if (vmodel.events.isEmpty) {
           return Center(
-            child: Text(
-              "Aucun évènement trouvé",
-              style: TextStyle(fontSize: 17),
-            ),
+            child: Text("No events found", style: TextStyle(fontSize: 17)),
           );
         }
         return RefreshIndicator(

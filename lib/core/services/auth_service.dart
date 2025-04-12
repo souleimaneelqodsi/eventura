@@ -20,9 +20,6 @@ class AuthService {
     try {
       final response =
           await _supabaseClient.from('users').insert(user.toJson()).select();
-      if (response == null) {
-        throw Exception("User creation failed: no data returned");
-      }
       if (response.isEmpty) {
         throw Exception("User creation failed: no data returned");
       }
@@ -40,9 +37,6 @@ class AuthService {
           .select()
           .ilike('email', '%$query%')
           .limit(1);
-      if (response == null) {
-        throw Exception("Search failed: no data returned");
-      }
       if (response.isEmpty) {
         throw Exception("Search failed: no data returned");
       }
@@ -59,10 +53,7 @@ class AuthService {
           .from('users')
           .select()
           .ilike('email', '%$query%')
-          .limit(5);
-      if (response == null) {
-        throw Exception("Search failed: no data returned");
-      }
+          .limit(10);
       if (response.isEmpty) {
         throw Exception("Search failed: no data returned");
       }
@@ -75,23 +66,16 @@ class AuthService {
 
   Future<UserModel?> getUserById(String userId) async {
     try {
-      final response =
-          await _supabaseClient
-              .from('users')
-              .select()
-              .eq('user_id', userId)
-              .single();
-      if (response == null) {
-        throw Exception(
-          "User retrieval failed: user not found/data not returned",
-        );
-      }
+      final response = await _supabaseClient
+          .from('users')
+          .select()
+          .eq('user_id', userId);
       if (response.isEmpty) {
         throw Exception(
           "User retrieval failed: user not found/data not returned",
         );
       }
-      return UserModel.fromJson(response);
+      return UserModel.fromJson(response.first);
     } catch (error) {
       logger.e("Error fetching user by ID", error: error);
       rethrow;
@@ -106,11 +90,6 @@ class AuthService {
               .update(user.toJson())
               .eq('user_id', user.userId)
               .select();
-      if (response == null) {
-        throw Exception(
-          "User creation failed: user not found/data not returned",
-        );
-      }
       if (response.isEmpty) {
         throw Exception(
           "User creation failed: user not found/data not returned",
@@ -118,30 +97,16 @@ class AuthService {
       }
       return UserModel.fromJson(response.first);
     } catch (error) {
-      logger.e(
-        "Une erreur s'est produite lors de la mise à jour de l'utilisateur",
-        error: error,
-      );
+      logger.e("Error during user update.", error: error);
       rethrow;
     }
   }
 
   Future<void> deleteUser(String userId) async {
     try {
-      final response = await _supabaseClient
-          .from('users')
-          .delete()
-          .eq('user_id', userId);
-      if (response == null) {
-        throw Exception(
-          "User deletion failed: user not found/data not returned",
-        );
-      }
+      await _supabaseClient.from('users').delete().eq('user_id', userId);
     } catch (error) {
-      logger.e(
-        "Une erreur s'est produite lors de la mise à jour de l'utilisateur",
-        error: error,
-      );
+      logger.e("Error during user deletion.", error: error);
     }
   }
 
@@ -225,7 +190,7 @@ class AuthService {
     try {
       await _supabaseAuth.signOut();
     } catch (error) {
-      logger.e("Erreur lors de la déconnexion.", error: error);
+      logger.e("Error during log out.", error: error);
       rethrow;
     }
   }
@@ -249,14 +214,9 @@ class AuthService {
         throw exception;
       }
       await _supabaseAuth.resetPasswordForEmail(email);
-      logger.t(
-        "E-mail de réinitialisation du mot de passe envoyé avec succès.",
-      );
+      logger.t("Reset email sent successfully.");
     } catch (error) {
-      logger.e(
-        "Erreur lors de la réinitialisation du mot de passe.",
-        error: error,
-      );
+      logger.e("Error during password reset.", error: error);
       rethrow;
     }
   }

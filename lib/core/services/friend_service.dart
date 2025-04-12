@@ -19,17 +19,13 @@ class FriendService {
   ) async {
     try {
       final response =
-          await _supabaseClient
-              .from('friends')
-              .insert({
-                'user_id_1': fromUserId,
-                'user_id_2': toUserId,
-                'status': 'pending',
-              })
-              .select()
-              .single();
+          await _supabaseClient.from('friends').insert({
+            'user_id_1': fromUserId,
+            'user_id_2': toUserId,
+            'status': 'pending',
+          }).select();
 
-      return FriendshipModel.fromJson(response);
+      return FriendshipModel.fromJson(response.first);
     } catch (e) {
       log.e("Error sending friend request: ${e.toString()}", error: e);
       rethrow;

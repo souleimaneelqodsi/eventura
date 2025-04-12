@@ -52,9 +52,11 @@ class _FriendsViewState extends State<FriendsView> {
 
   Future<void> _loadData() async {
     var authService = Provider.of<AuthService>(context, listen: false);
+
     _currentUser =
         await authService.getUserById(authService.currentUser!.id) as UserModel;
-    if (context.mounted) {
+
+    if (mounted) {
       await _viewModel.fetchFriendsAndRequests(_currentUser.userId, context);
     }
   }
@@ -93,84 +95,96 @@ class _FriendsViewState extends State<FriendsView> {
             child: FloatingActionButton(
               onPressed: () async {
                 Dialog addAFriend = Dialog(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          "Add a friend",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.7,
+                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Add a friend",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Text("Enter the email of the person you want to add"),
-                        SizedBox(height: 16),
-                        SearchAnchor.bar(
-                          barHintText: "Search by email",
-                          //viewConstraints: const BoxConstraints(maxHeight: 300),
-                          suggestionsBuilder: (
-                            BuildContext context,
-                            SearchController controller,
-                          ) async {
-                            var searchResults = await Provider.of<AuthService>(
-                              context,
-                              listen: false,
-                            ).searchUsers(controller.value.text);
-                            return searchResults.map(
-                              (user) => ListTile(
-                                title: Text(
-                                  '${user.firstName} ${user.lastName}',
-                                ),
-                                subtitle: Text(user.email ?? ''),
-                                onTap: () {
-                                  controller.closeView(
+                          SizedBox(height: 8),
+                          Text(
+                            "Enter the email of the person you want to add",
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 16),
+                          SearchAnchor.bar(
+                            barHintText: "Search by email",
+                            viewConstraints: const BoxConstraints(
+                              maxHeight: 300,
+                            ),
+                            suggestionsBuilder: (
+                              BuildContext context,
+                              SearchController controller,
+                            ) async {
+                              var searchResults =
+                                  await Provider.of<AuthService>(
+                                    context,
+                                    listen: false,
+                                  ).searchUsers(controller.value.text);
+                              return searchResults.map(
+                                (user) => ListTile(
+                                  title: Text(
                                     '${user.firstName} ${user.lastName}',
-                                  );
-                                  showDialog(
-                                    context: context,
-                                    builder:
-                                        (context) => AlertDialog(
-                                          title: Text(
-                                            'Do you really want to add ${user.firstName} ${user.lastName} as a friend?',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () {
-                                                _viewModel.sendFriendRequest(
-                                                  _currentUser.userId,
-                                                  user.userId,
-                                                );
-                                                ScaffoldMessenger.of(
-                                                  context,
-                                                ).showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      'Friend request sent!',
+                                  ),
+                                  subtitle: Text(user.email ?? ''),
+                                  onTap: () {
+                                    controller.closeView('${user.email}');
+                                    showDialog(
+                                      context: context,
+                                      builder:
+                                          (context) => AlertDialog(
+                                            title: Text(
+                                              'Do you really want to add ${user.firstName} ${user.lastName} as a friend?',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('No'),
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  _viewModel.sendFriendRequest(
+                                                    _currentUser.userId,
+                                                    user.userId,
+                                                  );
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        'Friend request sent!',
+                                                      ),
                                                     ),
-                                                  ),
-                                                );
-                                                Navigator.pop(context);
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text('Yes'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text('No'),
-                                            ),
-                                          ],
-                                        ),
-                                  );
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                                                  );
+                                                  Navigator.pop(context);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text('Yes'),
+                                              ),
+                                            ],
+                                          ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -274,6 +288,17 @@ class _FriendsViewState extends State<FriendsView> {
                                             entry.key.friendshipId,
                                           );
                                           await _loadData();
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'You and ${entry.value!.firstName} ${entry.value!.lastName} are now friends!',
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         },
                                       ),
                                       IconButton(
@@ -284,6 +309,17 @@ class _FriendsViewState extends State<FriendsView> {
                                             entry.key.friendshipId,
                                           );
                                           await _loadData();
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'You have rejected ${entry.value!.firstName} ${entry.value!.lastName}\'s friend request.',
+                                                ),
+                                              ),
+                                            );
+                                          }
                                         },
                                       ),
                                     ],
@@ -308,11 +344,14 @@ class _FriendsViewState extends State<FriendsView> {
                                         TextSpan(
                                           text: 'since ',
                                           style: TextStyle(
-                                            color: Colors.grey,
-                                            //fontStyle: FontStyle.italic,
+                                            color: Colors.blueGrey,
+                                            fontSize: 15,
                                           ),
                                         ),
-                                        TextSpan(text: friendship.createdAt),
+                                        TextSpan(
+                                          text: friendship.createdAt,
+                                          style: TextStyle(color: Colors.black),
+                                        ),
                                       ],
                                     ),
                                   ),

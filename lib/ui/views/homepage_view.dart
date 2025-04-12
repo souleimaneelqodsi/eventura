@@ -52,7 +52,7 @@ class _HomepageViewState extends State<HomepageView> {
           leading: Builder(
             builder:
                 (context) => IconButton(
-                  icon: const Icon(Icons.menu),
+                  icon: const Icon(Icons.menu, size: 30),
                   onPressed: () {
                     Scaffold.of(context).openDrawer();
                   },
@@ -69,49 +69,117 @@ class _HomepageViewState extends State<HomepageView> {
           ],
         ),
         drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
+          width: MediaQuery.of(context).size.width * 0.6,
+
+          child: Column(
             children: [
-              SizedBox(
-                height: 125,
-                child: const DrawerHeader(
-                  //decoration: BoxDecoration(color: Colors.blue),
-                  child: Text(
-                    'Menu',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.all(8),
+                  children: [
+                    SizedBox(
+                      height: 125,
+                      child: const DrawerHeader(
+                        //decoration: BoxDecoration(color: Colors.blue),
+                        child: Text(
+                          'Menu',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    ListTile(
+                      title: const Text(
+                        'Home',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/home');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'Profile',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'Settings',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/settings');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'FAQ',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/faq');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'About',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/about');
+                      },
+                    ),
+                    const Divider(indent: 7, thickness: 2),
+                    ListTile(
+                      title: const Text(
+                        'Contact',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, '/contact');
+                      },
+                    ),
+                  ],
                 ),
               ),
-              ListTile(
-                title: const Text('Profile'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/profile');
-                },
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  "Version 1.0.0",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
               ),
-              ListTile(
-                title: const Text('Settings'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/settings');
-                },
-              ),
-              ListTile(
-                title: const Text('FAQ'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/faq');
-                },
-              ),
-              ListTile(
-                title: const Text('About'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/about');
-                },
-              ),
-              ListTile(
-                title: const Text('Contact'),
-                onTap: () {
-                  Navigator.pushNamed(context, '/contact');
-                },
-              ),
+              SizedBox(height: 48.0),
             ],
           ),
         ),
@@ -125,7 +193,7 @@ class _HomepageViewState extends State<HomepageView> {
                       children: [
                         TextField(
                           decoration: InputDecoration(
-                            hintText: 'Rechercher des événements',
+                            hintText: 'Search Events',
                             prefixIcon: const Icon(Icons.search),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8.0),
@@ -155,7 +223,7 @@ class _HomepageViewState extends State<HomepageView> {
                                   setState(() => _eventTypeIndex = 2);
                                 },
                                 child: const Text(
-                                  'Événements',
+                                  'Events',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -176,7 +244,6 @@ class _HomepageViewState extends State<HomepageView> {
                       ],
                     ),
                   ),
-                  //if (currentPageIndex == 1)
                   Expanded(
                     child:
                         _eventTypeIndex == 1
@@ -188,7 +255,8 @@ class _HomepageViewState extends State<HomepageView> {
                 ],
               ),
               EventListView(), // favorites
-              friendsView, // messages
+              friendsView, // friends
+              MessagesView(), // messages
               ProfileView(
                 // user's profile
                 userId: Provider.of<AuthService>(context).currentUser!.id,
@@ -208,6 +276,7 @@ class _HomepageViewState extends State<HomepageView> {
               icon: Icon(Icons.group_rounded),
               label: "Friends",
             ),
+            NavigationDestination(icon: Icon(Icons.message), label: "Messages"),
             NavigationDestination(
               icon: Icon(Icons.account_circle),
               label: "Account",

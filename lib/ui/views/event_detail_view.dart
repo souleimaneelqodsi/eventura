@@ -16,7 +16,7 @@ class EventDetailView extends StatelessWidget {
     });
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Détails de l'événement")),
+      appBar: AppBar(title: const Text("Event Details")),
       body: Consumer<EventViewmodel>(
         builder: (context, vmodel, child) {
           if (vmodel.hasError) {
@@ -24,7 +24,7 @@ class EventDetailView extends StatelessWidget {
               padding: const EdgeInsets.all(8.0),
               child: Center(
                 child: Text(
-                  "Une erreur s'est produite : ${vmodel.errorMessage}",
+                  "An error occurred: ${vmodel.errorMessage}",
                   style: TextStyle(color: Colors.red, fontSize: 20),
                   textAlign: TextAlign.center,
                 ),
@@ -32,7 +32,7 @@ class EventDetailView extends StatelessWidget {
             );
           }
           if (vmodel.event == null) {
-            return const Center(child: Text("Cet évènement n'existe pas."));
+            return const Center(child: Text("This event does not exist."));
           }
           final event = vmodel.event!;
           return Padding(
@@ -52,7 +52,7 @@ class EventDetailView extends StatelessWidget {
                   text: TextSpan(
                     children: <TextSpan>[
                       TextSpan(
-                        text: "Lieu",
+                        text: "Location",
                         style: TextStyle(
                           decoration: TextDecoration.underline,
                           decorationThickness: 2,
@@ -101,14 +101,14 @@ class EventDetailView extends StatelessWidget {
                           context: context,
                           builder:
                               (context) => AlertDialog(
-                                title: const Text("Supprimer l'événement ?"),
+                                title: const Text("Delete?"),
                                 content: const Text(
-                                  "Êtes-vous sûr de vouloir supprimer cet événement ?",
+                                  "Are you sure you want to delete this event?",
                                 ),
                                 actions: [
                                   TextButton(
                                     onPressed: () => Navigator.pop(context),
-                                    child: const Text("Annuler"),
+                                    child: const Text("Cancel"),
                                   ),
                                   ElevatedButton(
                                     onPressed: () async {
@@ -125,7 +125,7 @@ class EventDetailView extends StatelessWidget {
                                                 vmodel.hasError
                                                     ? Text(vmodel.errorMessage!)
                                                     : Text(
-                                                      "Évènement supprimé avec succès",
+                                                      "Event deleted successfully",
                                                     ),
                                           ),
                                         );
@@ -139,7 +139,7 @@ class EventDetailView extends StatelessWidget {
                                         vmodel.isBusy
                                             ? CircularProgressIndicator()
                                             : Text(
-                                              "Supprimer",
+                                              "Delete",
                                               style: TextStyle(
                                                 color: Colors.white,
                                               ),
@@ -153,7 +153,7 @@ class EventDetailView extends StatelessWidget {
                         backgroundColor: Colors.red,
                       ),
                       child: const Text(
-                        "Supprimer",
+                        "Delete",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
