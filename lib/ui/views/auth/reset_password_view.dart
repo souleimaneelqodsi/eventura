@@ -1,6 +1,6 @@
+import 'package:eventura/core/viewmodels/auth/reset_password_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:eventura/core/viewmodels/auth/reset_password_viewmodel.dart';
 
 class ResetPasswordView extends StatefulWidget {
   const ResetPasswordView({super.key});
