@@ -16,7 +16,6 @@ class _FriendsViewState extends State<FriendsView> {
   late FriendsViewmodel _viewModel;
   late UserModel _currentUser;
 
-  // ignore: prefer_function_declarations_over_variables
   final _buttonStyle = (pageSwitch, pageIndex) {
     return pageIndex == 1
         ? (pageSwitch
@@ -128,59 +127,125 @@ class _FriendsViewState extends State<FriendsView> {
                               BuildContext context,
                               SearchController controller,
                             ) async {
-                              var searchResults =
-                                  await Provider.of<AuthService>(
-                                    context,
-                                    listen: false,
-                                  ).searchUsers(controller.value.text);
-                              return searchResults.map(
-                                (user) => ListTile(
-                                  title: Text(
-                                    '${user.firstName} ${user.lastName}',
+                              if (controller.value.text.isEmpty) {
+                                return [
+                                  const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text("Type an email to search"),
+                                    ),
                                   ),
-                                  subtitle: Text(user.email ?? ''),
-                                  onTap: () {
-                                    controller.closeView('${user.email}');
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => AlertDialog(
-                                            title: Text(
-                                              'Do you really want to add ${user.firstName} ${user.lastName} as a friend?',
-                                            ),
-                                            actions: [
-                                              TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text('No'),
+                                ];
+                              }
+
+                              try {
+                                var searchResults =
+                                    await Provider.of<AuthService>(
+                                      context,
+                                      listen: false,
+                                    ).searchUsers(controller.value.text);
+
+                                searchResults =
+                                    searchResults.where((user) {
+                                      if (user.userId == _currentUser.userId) {
+                                        return false;
+                                      }
+
+                                      for (var friend
+                                          in vmodel.friends.values) {
+                                        if (friend?.userId == user.userId) {
+                                          return false;
+                                        }
+                                      }
+
+                                      for (var pending
+                                          in vmodel.pendingRequests.values) {
+                                        if (pending?.userId == user.userId) {
+                                          return false;
+                                        }
+                                      }
+
+                                      return true;
+                                    }).toList();
+
+                                if (searchResults.isEmpty) {
+                                  return [
+                                    const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16.0),
+                                        child: Text(
+                                          "No users found or all users are already in your network",
+                                        ),
+                                      ),
+                                    ),
+                                  ];
+                                }
+
+                                return searchResults.map(
+                                  (user) => ListTile(
+                                    title: Text(
+                                      '${user.firstName} ${user.lastName}',
+                                    ),
+                                    subtitle: Text(user.email ?? ''),
+                                    onTap: () {
+                                      controller.closeView('${user.email}');
+                                      showDialog(
+                                        context: context,
+                                        builder:
+                                            (context) => AlertDialog(
+                                              title: Text(
+                                                'Do you really want to add ${user.firstName} ${user.lastName} as a friend?',
                                               ),
-                                              TextButton(
-                                                onPressed: () {
-                                                  _viewModel.sendFriendRequest(
-                                                    _currentUser.userId,
-                                                    user.userId,
-                                                  );
-                                                  ScaffoldMessenger.of(
-                                                    context,
-                                                  ).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text(
-                                                        'Friend request sent!',
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text('No'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () {
+                                                    _viewModel
+                                                        .sendFriendRequest(
+                                                          _currentUser.userId,
+                                                          user.userId,
+                                                        );
+                                                    ScaffoldMessenger.of(
+                                                      context,
+                                                    ).showSnackBar(
+                                                      SnackBar(
+                                                        content: Text(
+                                                          'Friend request sent!',
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
-                                                  Navigator.pop(context);
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text('Yes'),
-                                              ),
-                                            ],
-                                          ),
-                                    );
-                                  },
-                                ),
-                              );
+                                                    );
+                                                    Navigator.pop(context);
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text('Yes'),
+                                                ),
+                                              ],
+                                            ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              } catch (e) {
+                                if (e.toString().contains(
+                                  "Search failed: no data returned",
+                                )) {
+                                  return [
+                                    const Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.all(16.0),
+                                        child: Text("No users found"),
+                                      ),
+                                    ),
+                                  ];
+                                } else {
+                                  rethrow;
+                                }
+                              }
                             },
                           ),
                         ],
