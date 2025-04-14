@@ -169,4 +169,29 @@ class ProfileViewmodel extends BaseViewmodel {
       setBusy(false);
     }
   }
+
+  Future<void> resetPassword() async {
+    try {
+      setBusy(true);
+      if (!isCurrentUserProfile) {
+        throw Exception("Cannot reset password for another user.");
+      }
+      await userService.resetPassword(user!.email);
+    } catch (e) {
+      setError(e.toString().replaceFirst("Exception: ", ""));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> signOut() async {
+    try {
+      setBusy(true);
+      await userService.signOut();
+    } catch (e) {
+      setError(e.toString().replaceFirst("Exception: ", ""));
+    } finally {
+      setBusy(false);
+    }
+  }
 }

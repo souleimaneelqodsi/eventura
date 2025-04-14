@@ -280,7 +280,7 @@ class _FriendsViewState extends State<FriendsView> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                SizedBox(height: 15),
+                SizedBox(height: 8),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: Row(
@@ -295,7 +295,7 @@ class _FriendsViewState extends State<FriendsView> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      SizedBox(width: 15),
+                      SizedBox(width: 8),
                       ElevatedButton(
                         style: _buttonStyle(_pageSelect, 1),
                         onPressed:
@@ -305,7 +305,7 @@ class _FriendsViewState extends State<FriendsView> {
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      SizedBox(width: 15),
+                      SizedBox(width: 8),
                       ElevatedButton(
                         style: _buttonStyle(_pageSelect, 2),
                         onPressed:
