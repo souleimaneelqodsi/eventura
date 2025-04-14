@@ -9,7 +9,7 @@ class AppTheme {
       useMaterial3: true,
     ); // Start with M3 light defaults
     final lightColorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primaryPurple, // Use your primary color as the seed
+      seedColor: AppColors.primaryPurple,
       brightness: Brightness.light,
 
       primary: AppColors.primaryPurple,
@@ -73,19 +73,19 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return lightColorScheme.primary;
           }
-          return null; // Use default
+          return null;
         }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
           if (states.contains(WidgetState.selected)) {
-            return lightColorScheme.primary.withOpacity(0.5);
+            return lightColorScheme.primary.withValues(alpha: 0.5);
           }
-          return null; // Use default
+          return null;
         }),
         trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
           if (states.contains(WidgetState.selected)) {
-            return Colors.transparent; // Optional: remove outline when selected
+            return Colors.transparent;
           }
-          return null; // Use default outline color otherwise
+          return null;
         }),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -114,11 +114,8 @@ class AppTheme {
         // Customize specific text styles if needed
         bodyMedium: GoogleFonts.lato(color: lightColorScheme.onSurface),
         titleMedium: GoogleFonts.lato(color: lightColorScheme.onSurface),
-        labelLarge: GoogleFonts.lato(
-          fontWeight: FontWeight.bold,
-        ), // Often used in buttons
+        labelLarge: GoogleFonts.lato(fontWeight: FontWeight.bold),
       ),
-      // Add other component themes as needed (CardTheme, ChipTheme, etc.)
     );
   }
 
@@ -128,15 +125,11 @@ class AppTheme {
       useMaterial3: true,
     ); // Start with M3 dark defaults
     final darkColorScheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primaryPurple, // Use the same seed color
+      seedColor: AppColors.primaryPurple,
       brightness: Brightness.dark,
       // Override specific roles if needed
-      primary:
-          AppColors
-              .primaryPurpleLight, // Often use a lighter primary in dark mode
-      error: AppColors.errorRedShade300, // Use a lighter red for contrast
-      // background: AppColors._darkBackground, // Or let fromSeed handle defaults
-      // surface: AppColors._darkSurface, // Or let fromSeed handle defaults
+      primary: AppColors.primaryPurpleLight,
+      error: AppColors.errorRedShade300,
     );
 
     return baseTheme.copyWith(
@@ -144,9 +137,9 @@ class AppTheme {
       // --- Component Themes (Dark Variants) ---
       scaffoldBackgroundColor: darkColorScheme.surface,
       appBarTheme: AppBarTheme(
-        backgroundColor: darkColorScheme.surface, // Common dark pattern
+        backgroundColor: darkColorScheme.surface,
         foregroundColor: darkColorScheme.onSurface,
-        elevation: 0, // Often less elevation in dark app bars
+        elevation: 0,
         titleTextStyle: GoogleFonts.lato(
           fontSize: 20,
           fontWeight: FontWeight.bold,
@@ -193,19 +186,19 @@ class AppTheme {
           if (states.contains(WidgetState.selected)) {
             return darkColorScheme.primary;
           }
-          return null; // Use default
+          return null;
         }),
         trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
           if (states.contains(WidgetState.selected)) {
-            return darkColorScheme.primary.withOpacity(0.5);
+            return darkColorScheme.primary.withValues(alpha: 0.5);
           }
-          return null; // Use default
+          return null;
         }),
         trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
           if (states.contains(WidgetState.selected)) {
-            return Colors.transparent; // Optional: remove outline when selected
+            return Colors.transparent;
           }
-          return null; // Use default outline color otherwise
+          return null;
         }),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -234,11 +227,8 @@ class AppTheme {
         // Customize specific text styles if needed
         bodyMedium: GoogleFonts.lato(color: darkColorScheme.onSurface),
         titleMedium: GoogleFonts.lato(color: darkColorScheme.onSurface),
-        labelLarge: GoogleFonts.lato(
-          fontWeight: FontWeight.bold,
-        ), // Often used in buttons
+        labelLarge: GoogleFonts.lato(fontWeight: FontWeight.bold),
       ),
-      // Add other component themes as needed
     );
   }
 }
