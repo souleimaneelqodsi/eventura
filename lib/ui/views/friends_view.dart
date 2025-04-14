@@ -24,10 +24,7 @@ class _FriendsViewState extends State<FriendsView> {
       backgroundColor: Colors.purple,
       foregroundColor: Colors.white,
     );
-    final unselected = ElevatedButton.styleFrom(
-      backgroundColor: null,
-      foregroundColor: Colors.black,
-    );
+    final unselected = ElevatedButton.styleFrom(backgroundColor: null);
     switch (pageSwitch) {
       case Page.friends:
         if (pageIndex == 0) {

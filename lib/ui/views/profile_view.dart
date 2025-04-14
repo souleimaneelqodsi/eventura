@@ -376,8 +376,8 @@ class _ProfileViewState extends State<ProfileView> {
                             children: [
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey,
-                                  foregroundColor: Colors.white,
+                                  // backgroundColor: Colors.grey,
+                                  // foregroundColor: Colors.white,
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 20,
                                     vertical: 13,
@@ -432,8 +432,8 @@ class _ProfileViewState extends State<ProfileView> {
                               SizedBox(height: 16),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.grey,
-                                  foregroundColor: Colors.white,
+                                  // backgroundColor: Colors.grey,
+                                  // foregroundColor: Colors.white,
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 20,
                                     vertical: 13,
@@ -860,7 +860,6 @@ class _ProfileViewState extends State<ProfileView> {
 
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: Colors.black,
                                       fontStyle: FontStyle.italic,
                                     ),
                                   ),

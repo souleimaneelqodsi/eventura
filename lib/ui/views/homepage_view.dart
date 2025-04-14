@@ -35,7 +35,7 @@ class _HomepageViewState extends State<HomepageView> {
   final _pressedStyle =
       (int i, int currentPage) => ElevatedButton.styleFrom(
         backgroundColor: currentPage == i ? Colors.purple : null,
-        foregroundColor: currentPage == i ? Colors.white : Colors.black,
+        foregroundColor: currentPage == i ? Colors.white : null,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       );
 

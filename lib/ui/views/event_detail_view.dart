@@ -56,15 +56,10 @@ class EventDetailView extends StatelessWidget {
                         style: TextStyle(
                           decoration: TextDecoration.underline,
                           decorationThickness: 2,
-                          decorationColor: Colors.black,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
-                      TextSpan(
-                        text: " : ${event.title}",
-                        style: TextStyle(color: Colors.black),
-                      ),
+                      TextSpan(text: " : ${event.title}"),
                     ],
                   ),
                 ),
@@ -77,15 +72,10 @@ class EventDetailView extends StatelessWidget {
                         style: TextStyle(
                           decoration: TextDecoration.underline,
                           decorationThickness: 2,
-                          decorationColor: Colors.black,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
                         ),
                       ),
-                      TextSpan(
-                        text: " : ${event.description}",
-                        style: TextStyle(color: Colors.black),
-                      ),
+                      TextSpan(text: " : ${event.description}"),
                     ],
                   ),
                 ),
