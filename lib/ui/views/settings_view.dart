@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:eventura/ui/static/coming_soon.dart';
 
-class SettingsView extends StatelessWidget{
+class SettingsView extends StatelessWidget {
   const SettingsView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return ComingSoon(title: 'Settings');
   }
 }

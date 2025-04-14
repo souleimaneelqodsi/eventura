@@ -12,7 +12,7 @@ class AuthWrapper extends StatelessWidget {
     final user = Supabase.instance.client.auth.currentUser;
 
     if (user != null) {
-      return const HomepageView();
+      return HomepageView();
     } else {
       return SignupView();
     }

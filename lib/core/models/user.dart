@@ -1,24 +1,25 @@
-class UserModel {
+import 'package:collection/collection.dart';
 
-  final String userId; 
-  final bool? genre; 
-  final String? profilePicture; // URL to the profile picture
+class UserModel {
+  final String userId;
+  final bool? genre;
+  final String? profilePicture;
   final String? timezone;
   final String? language;
-  final String? userRole; 
-  final String? accStatus; //"active", "inactive", "banned"
+  final String? userRole;
+  final String? accStatus;
   final DateTime? lastLogin;
   final bool? firstLogin;
   final Map<String, dynamic>? notificationsPreferences;
   final String? firstName;
   final String? lastName;
   final DateTime? birthday;
-  final String? email;
+  final String email;
   final String? phoneNumber;
-  final String? socials; 
+  final String? socials;
   final int? gold;
   final String? bio;
-  final Map<String, dynamic>? allergies; 
+  final Map<String, dynamic>? allergies;
   final String? membershipLevel;
 
   UserModel({
@@ -44,7 +45,6 @@ class UserModel {
     this.membershipLevel,
   });
 
-
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
       userId: json['user_id'] as String,
@@ -54,13 +54,20 @@ class UserModel {
       language: json['language'] as String?,
       userRole: json['user_role'] as String?,
       accStatus: json['acc_status'] as String?,
-      lastLogin: json['last_login'] == null ? null : DateTime.parse(json['last_login'] as String),
+      lastLogin:
+          json['last_login'] == null
+              ? null
+              : DateTime.parse(json['last_login'] as String),
       firstLogin: json['first_login'] as bool?,
-      notificationsPreferences: json['notifications_preferences'] as Map<String, dynamic>?,
+      notificationsPreferences:
+          json['notifications_preferences'] as Map<String, dynamic>?,
       firstName: json['first_name'] as String?,
       lastName: json['last_name'] as String?,
-      birthday: json['birthday'] == null ? null : DateTime.parse(json['birthday'] as String),
-      email: json['email'] as String?,
+      birthday:
+          json['birthday'] == null
+              ? null
+              : DateTime.parse(json['birthday'] as String),
+      email: json['email'] as String,
       phoneNumber: json['phone_number'] as String?,
       socials: json['socials'] as String?,
       gold: json['gold'] as int?,
@@ -72,19 +79,19 @@ class UserModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'user_id': userId, 
+      'user_id': userId,
       'genre': genre,
       'profile_picture': profilePicture,
       'timezone': timezone,
       'language': language,
       'user_role': userRole,
       'acc_status': accStatus,
-      'last_login': lastLogin?.toIso8601String(), 
+      'last_login': lastLogin?.toIso8601String(),
       'first_login': firstLogin,
       'notifications_preferences': notificationsPreferences,
       'first_name': firstName,
       'last_name': lastName,
-      'birthday': birthday?.toIso8601String(), 
+      'birthday': birthday?.toIso8601String(),
       'email': email,
       'phone_number': phoneNumber,
       'socials': socials,
@@ -94,7 +101,8 @@ class UserModel {
       'membership_level': membershipLevel,
     };
   }
-    UserModel copyWith({
+
+  UserModel copyWith({
     String? userId,
     bool? genre,
     String? profilePicture,
@@ -115,28 +123,83 @@ class UserModel {
     String? bio,
     Map<String, dynamic>? allergies,
     String? membershipLevel,
-    }) {
+  }) {
     return UserModel(
-    userId: userId ?? this.userId,
-    genre: genre ?? this.genre,
-    profilePicture: profilePicture ?? this.profilePicture,
-    timezone: timezone ?? this.timezone,
-    language: language ?? this.language,
-    userRole: userRole ?? this.userRole,
-    accStatus: accStatus ?? this.accStatus,
-    lastLogin: lastLogin ?? this.lastLogin,
-    firstLogin: firstLogin ?? this.firstLogin,
-    notificationsPreferences: notificationsPreferences ?? this.notificationsPreferences,
-    firstName: firstName ?? this.firstName,
-    lastName: lastName ?? this.lastName,
-    birthday: birthday ?? this.birthday,
-    email: email ?? this.email,
-    phoneNumber: phoneNumber ?? this.phoneNumber,
-    socials: socials ?? this.socials,
-    gold: gold ?? this.gold,
-    bio: bio ?? this.bio,
-    allergies: allergies ?? this.allergies,
-    membershipLevel: membershipLevel ?? this.membershipLevel,
+      userId: userId ?? this.userId,
+      genre: genre ?? this.genre,
+      profilePicture: profilePicture ?? this.profilePicture,
+      timezone: timezone ?? this.timezone,
+      language: language ?? this.language,
+      userRole: userRole ?? this.userRole,
+      accStatus: accStatus ?? this.accStatus,
+      lastLogin: lastLogin ?? this.lastLogin,
+      firstLogin: firstLogin ?? this.firstLogin,
+      notificationsPreferences:
+          notificationsPreferences ?? this.notificationsPreferences,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      birthday: birthday ?? this.birthday,
+      email: email ?? this.email,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
+      socials: socials ?? this.socials,
+      gold: gold ?? this.gold,
+      bio: bio ?? this.bio,
+      allergies: allergies ?? this.allergies,
+      membershipLevel: membershipLevel ?? this.membershipLevel,
     );
-    }
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is UserModel &&
+        other.userId == userId &&
+        other.genre == genre &&
+        other.profilePicture == profilePicture &&
+        other.timezone == timezone &&
+        other.language == language &&
+        other.userRole == userRole &&
+        other.accStatus == accStatus &&
+        other.lastLogin == lastLogin &&
+        other.firstLogin == firstLogin &&
+        const MapEquality().equals(
+          other.notificationsPreferences,
+          notificationsPreferences,
+        ) &&
+        other.firstName == firstName &&
+        other.lastName == lastName &&
+        other.birthday == birthday &&
+        other.email == email &&
+        other.phoneNumber == phoneNumber &&
+        other.socials == socials &&
+        other.gold == gold &&
+        other.bio == bio &&
+        const MapEquality().equals(other.allergies, allergies) &&
+        other.membershipLevel == membershipLevel;
+  }
+
+  @override
+  int get hashCode {
+    return userId.hashCode ^
+        genre.hashCode ^
+        profilePicture.hashCode ^
+        timezone.hashCode ^
+        language.hashCode ^
+        userRole.hashCode ^
+        accStatus.hashCode ^
+        lastLogin.hashCode ^
+        firstLogin.hashCode ^
+        const MapEquality().hash(notificationsPreferences) ^
+        firstName.hashCode ^
+        lastName.hashCode ^
+        birthday.hashCode ^
+        email.hashCode ^
+        phoneNumber.hashCode ^
+        socials.hashCode ^
+        gold.hashCode ^
+        bio.hashCode ^
+        const MapEquality().hash(allergies) ^
+        membershipLevel.hashCode;
+  }
 }

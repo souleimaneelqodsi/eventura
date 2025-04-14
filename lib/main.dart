@@ -1,3 +1,5 @@
+import 'package:eventura/core/services/auth_service.dart';
+import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/providers.dart';
 import 'package:eventura/ui/shared/app_theme.dart';
 import 'package:eventura/ui/static/about_us.dart';
@@ -79,8 +81,19 @@ class Eventura extends StatelessWidget {
         '/profile': (context) {
           final args = ModalRoute.of(context)!.settings.arguments;
           final userId = args as String?;
+          final finalUserId = userId ?? supabase.auth.currentUser!.id;
 
-          return ProfileView(userId: userId ?? supabase.auth.currentUser!.id);
+          print('Navigating to profile with userId: $finalUserId');
+
+          return ChangeNotifierProvider(
+            key: ValueKey('profile_route_$finalUserId'), // Add a unique key
+            create:
+                (context) => ProfileViewmodel(
+                  userService: Provider.of<AuthService>(context, listen: false),
+                  userId: finalUserId,
+                ),
+            child: ProfileView(userId: finalUserId, fromHome: false),
+          );
         },
         '/settings': (context) => SettingsView(),
         '/about': (context) => AboutUs(),
