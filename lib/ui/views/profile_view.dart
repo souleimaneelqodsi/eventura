@@ -370,6 +370,142 @@ class _ProfileViewState extends State<ProfileView> {
                             ],
                           ),
                         SizedBox(height: 10),
+                        if (isCurrentUser)
+                          Column(
+                            children: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 13,
+                                  ),
+                                ),
+                                child:
+                                    viewmodel.isBusy
+                                        ? CircularProgressIndicator(
+                                          color: Colors.white,
+                                        )
+                                        : SizedBox(
+                                          width: 150,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.password,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 7),
+                                              Text(
+                                                "Reset Password",
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                onPressed: () async {
+                                  await viewmodel.resetPassword();
+                                  if (viewmodel.hasError) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: Colors.red,
+                                          content: Text(
+                                            "An error occurred: ${viewmodel.errorMessage}",
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "A password reset email has been sent to your email address.",
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                              SizedBox(height: 16),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 13,
+                                  ),
+                                ),
+                                child:
+                                    viewmodel.isBusy
+                                        ? CircularProgressIndicator(
+                                          color: Colors.white,
+                                        )
+                                        : SizedBox(
+                                          width: 100,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.logout,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                "Sign Out",
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                onPressed: () async {
+                                  await viewmodel.signOut();
+                                  if (viewmodel.hasError) {
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          backgroundColor: Colors.red,
+                                          content: Text(
+                                            "An error occurred while signing out. Please try again later or contact support: ${viewmodel.errorMessage}",
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "You have been signed out. See you soon on Eventura!",
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         if (!isCurrentUser &&
                             !isFriend() &&
                             isIncomingRequest())
