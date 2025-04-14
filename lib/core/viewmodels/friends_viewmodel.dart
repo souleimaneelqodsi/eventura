@@ -10,7 +10,8 @@ class FriendsViewmodel extends BaseViewmodel {
   final FriendService friendService;
 
   Map<FriendshipModel, UserModel?> friends = {};
-  Map<FriendshipModel, UserModel?> pendingRequests = {};
+  Map<FriendshipModel, UserModel?> pendingRequestsReceived = {};
+  Map<FriendshipModel, UserModel?> pendingRequestsSent = {};
 
   Future<void> fetchFriendsAndRequests(
     String currentUserId,
@@ -22,11 +23,16 @@ class FriendsViewmodel extends BaseViewmodel {
         friends = await friendService.getFriends(currentUserId, context);
       }
       if (context.mounted) {
-        pendingRequests = await friendService.getPendingRequests(
-          currentUserId,
+        pendingRequestsReceived = await friendService.getPendingRequests(
           context,
         );
       }
+      if (context.mounted) {
+        pendingRequestsSent = await friendService.getFriendRequestsSent(
+          context,
+        );
+      }
+      notifyListeners();
     } catch (e) {
       setError(e.toString());
     } finally {
@@ -37,7 +43,7 @@ class FriendsViewmodel extends BaseViewmodel {
   Future<void> sendFriendRequest(String fromUserId, String toUserId) async {
     try {
       setBusy(true);
-      await friendService.sendFriendRequest(fromUserId, toUserId);
+      await friendService.sendFriendRequest(toUserId);
     } catch (e) {
       setError(e.toString());
     } finally {
@@ -60,6 +66,17 @@ class FriendsViewmodel extends BaseViewmodel {
     try {
       setBusy(true);
       await friendService.rejectFriendRequest(friendRequestId);
+    } catch (e) {
+      setError(e.toString());
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> cancelFriendRequest(String toUserId) async {
+    try {
+      setBusy(true);
+      await friendService.cancelFriendRequest(toUserId);
     } catch (e) {
       setError(e.toString());
     } finally {

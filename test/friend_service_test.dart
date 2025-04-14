@@ -53,7 +53,10 @@ void main() {
       'fake_anon_key',
       httpClient: mockHttpClient,
     );
-    friendService = FriendService(supabaseClient: mockSupabase);
+    friendService = FriendService(
+      supabaseClient: mockSupabase,
+      userId: 'user1',
+    );
     mockAuthService = MockAuthService();
   });
 
@@ -173,7 +176,10 @@ void main() {
           httpClient: mockHttpClient,
         );
 
-        friendService = FriendService(supabaseClient: mockSupabase);
+        friendService = FriendService(
+          supabaseClient: mockSupabase,
+          userId: 'user1',
+        );
 
         final friendship = FriendshipModel(
           friendshipId: 1,
@@ -325,14 +331,21 @@ void main() {
     testWidgets(
       'getPendingRequests returns map of pending friendship requests',
       (WidgetTester tester) async {
-        final testFriendship1 = Map<String, dynamic>.from(testFriendshipBase)
-          ..['created_at'] = validDateString;
+        final testFriendship1 = {
+          'friendship_id': 1,
+          'user_id_1': 'otherUser1',
+          'user_id_2': 'user1', // Should match friendService.userId
+          'status': 'pending',
+          'created_at': validDateString,
+        };
 
-        final testFriendship2 =
-            Map<String, dynamic>.from(testFriendshipBase)
-              ..['created_at'] = validDateString
-              ..['friendship_id'] = 2
-              ..['user_id_1'] = 'user3';
+        final testFriendship2 = {
+          'friendship_id': 2,
+          'user_id_1': 'otherUser2',
+          'user_id_2': 'user1', // Should match friendService.userId
+          'status': 'pending',
+          'created_at': validDateString,
+        };
 
         await mockSupabase.from('friends').insert([
           testFriendship1,
@@ -340,11 +353,11 @@ void main() {
         ]);
 
         when(
-          mockAuthService.getUserById('user1'),
+          mockAuthService.getUserById('otherUser1'),
         ).thenAnswer((_) async => testUser1);
         when(
-          mockAuthService.getUserById('user3'),
-        ).thenAnswer((_) async => testUser1);
+          mockAuthService.getUserById('otherUser2'),
+        ).thenAnswer((_) async => testUser2);
 
         final completer = Completer<Map<FriendshipModel, UserModel?>>();
 
@@ -358,7 +371,6 @@ void main() {
                     WidgetsBinding.instance.addPostFrameCallback((_) async {
                       try {
                         final result = await friendService.getPendingRequests(
-                          'user2',
                           context,
                         );
                         completer.complete(result);
@@ -401,7 +413,6 @@ void main() {
                     WidgetsBinding.instance.addPostFrameCallback((_) async {
                       try {
                         final result = await friendService.getPendingRequests(
-                          'userWithNoRequests',
                           context,
                         );
                         completer.complete(result);

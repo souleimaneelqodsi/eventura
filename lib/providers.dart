@@ -10,8 +10,9 @@ import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:eventura/core/viewmodels/events_list_viewmodel.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/messages_list_viewmodel.dart';
-import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
+// import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
+import 'package:eventura/ui/shared/is_editing_profile.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,7 +22,11 @@ List<SingleChildWidget> providers = [
   Provider<AuthService>(create: (_) => AuthService(supabaseClient: supabase)),
   Provider<EventService>(create: (_) => EventService(supabaseClient: supabase)),
   Provider<FriendService>(
-    create: (_) => FriendService(supabaseClient: supabase),
+    create:
+        (_) => FriendService(
+          userId: supabase.auth.currentUser!.id,
+          supabaseClient: supabase,
+        ),
   ),
 
   // --- ViewModels ---
@@ -65,12 +70,8 @@ List<SingleChildWidget> providers = [
     create: (context) => SettingsViewmodel(),
   ),
 
-  ChangeNotifierProvider<ProfileViewmodel>(
-    create:
-        (context) => ProfileViewmodel(
-          userService: context.read<AuthService>(),
-          userId: '',
-        ), // Provide necessary dependencies
+  ChangeNotifierProvider<ProfileEditingState>(
+    create: (context) => ProfileEditingState(),
   ),
 ];
 

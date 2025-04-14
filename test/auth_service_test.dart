@@ -63,6 +63,7 @@ void main() {
       final authService = AuthService(supabaseClient: mockSupabase);
       final updatedUser = await authService.updateUser(
         UserModel(userId: 'test_id', email: 'new@example.com'),
+        true,
       );
 
       expect(updatedUser, isA<UserModel>());

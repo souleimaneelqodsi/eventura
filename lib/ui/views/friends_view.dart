@@ -1,6 +1,7 @@
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
+import 'package:eventura/ui/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,35 +12,39 @@ class FriendsView extends StatefulWidget {
   State<FriendsView> createState() => _FriendsViewState();
 }
 
+enum Page { friends, received, sent }
+
 class _FriendsViewState extends State<FriendsView> {
-  bool _pageSwitch = false;
+  Page _pageSelect = Page.friends;
   late FriendsViewmodel _viewModel;
   late UserModel _currentUser;
 
   final _buttonStyle = (pageSwitch, pageIndex) {
-    return pageIndex == 1
-        ? (pageSwitch
-            ? ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            )
-            : ElevatedButton.styleFrom(
-              backgroundColor: null,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            ))
-        : (pageSwitch
-            ? ElevatedButton.styleFrom(
-              backgroundColor: null,
-              foregroundColor: Colors.black,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            )
-            : ElevatedButton.styleFrom(
-              backgroundColor: Colors.purple,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            ));
+    final selected = ElevatedButton.styleFrom(
+      backgroundColor: Colors.purple,
+      foregroundColor: Colors.white,
+    );
+    final unselected = ElevatedButton.styleFrom(
+      backgroundColor: null,
+      foregroundColor: Colors.black,
+    );
+    switch (pageSwitch) {
+      case Page.friends:
+        if (pageIndex == 0) {
+          return selected;
+        }
+        return unselected;
+      case Page.received:
+        if (pageIndex == 1) {
+          return selected;
+        }
+        return unselected;
+      case Page.sent:
+        if (pageIndex == 2) {
+          return selected;
+        }
+        return unselected;
+    }
   };
 
   @override
@@ -159,7 +164,9 @@ class _FriendsViewState extends State<FriendsView> {
                                       }
 
                                       for (var pending
-                                          in vmodel.pendingRequests.values) {
+                                          in vmodel
+                                              .pendingRequestsReceived
+                                              .values) {
                                         if (pending?.userId == user.userId) {
                                           return false;
                                         }
@@ -186,9 +193,9 @@ class _FriendsViewState extends State<FriendsView> {
                                     title: Text(
                                       '${user.firstName} ${user.lastName}',
                                     ),
-                                    subtitle: Text(user.email ?? ''),
+                                    subtitle: Text(user.email),
                                     onTap: () {
-                                      controller.closeView('${user.email}');
+                                      controller.closeView(user.email);
                                       showDialog(
                                         context: context,
                                         builder:
@@ -213,6 +220,7 @@ class _FriendsViewState extends State<FriendsView> {
                                                         ),
                                                       ),
                                                     );
+                                                    _loadData();
                                                     Navigator.pop(context);
                                                     Navigator.pop(context);
                                                   },
@@ -279,9 +287,9 @@ class _FriendsViewState extends State<FriendsView> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       ElevatedButton(
-                        style: _buttonStyle(_pageSwitch, 0),
+                        style: _buttonStyle(_pageSelect, 0),
                         onPressed:
-                            () => setState(() => _pageSwitch = !_pageSwitch),
+                            () => setState(() => _pageSelect = Page.friends),
                         child: Text(
                           'My Friends',
                           style: TextStyle(fontWeight: FontWeight.bold),
@@ -289,11 +297,21 @@ class _FriendsViewState extends State<FriendsView> {
                       ),
                       SizedBox(width: 15),
                       ElevatedButton(
-                        style: _buttonStyle(_pageSwitch, 1),
+                        style: _buttonStyle(_pageSelect, 1),
                         onPressed:
-                            () => setState(() => _pageSwitch = !_pageSwitch),
+                            () => setState(() => _pageSelect = Page.received),
                         child: Text(
-                          'Friend Requests',
+                          'Received Requests',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      SizedBox(width: 15),
+                      ElevatedButton(
+                        style: _buttonStyle(_pageSelect, 2),
+                        onPressed:
+                            () => setState(() => _pageSelect = Page.sent),
+                        child: Text(
+                          'Sent Requests',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -305,7 +323,7 @@ class _FriendsViewState extends State<FriendsView> {
                   child:
                       vmodel.isBusy
                           ? const Center(child: CircularProgressIndicator())
-                          : _pageSwitch
+                          : _pageSelect == Page.received
                           ? ListView(
                             children: [
                               const ListTile(
@@ -317,8 +335,25 @@ class _FriendsViewState extends State<FriendsView> {
                                   ),
                                 ),
                               ),
-                              for (var entry in vmodel.pendingRequests.entries)
+                              for (var entry
+                                  in vmodel.pendingRequestsReceived.entries)
                                 ListTile(
+                                  onTap: () {
+                                    final friendUserId =
+                                        vmodel
+                                            .pendingRequestsReceived[entry.key]!
+                                            .userId;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => ProfileView(
+                                              fromHome: false,
+                                              userId: friendUserId,
+                                            ),
+                                      ),
+                                    );
+                                  },
                                   leading: Icon(Icons.person, size: 32),
 
                                   title: Column(
@@ -333,7 +368,7 @@ class _FriendsViewState extends State<FriendsView> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
-                                        entry.value!.email ?? '',
+                                        entry.value!.email,
                                         style: TextStyle(
                                           color: Colors.grey,
                                           fontStyle: FontStyle.italic,
@@ -390,12 +425,37 @@ class _FriendsViewState extends State<FriendsView> {
                                     ],
                                   ),
                                 ),
+                              SizedBox(height: 10),
                             ],
                           )
-                          : ListView(
+                          : _pageSelect == Page.friends
+                          ? ListView(
                             children: [
+                              const ListTile(
+                                title: Text(
+                                  'Friends',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
                               for (var friendship in vmodel.friends.keys)
                                 ListTile(
+                                  onTap: () {
+                                    final friendUserId =
+                                        vmodel.friends[friendship]!.userId;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => ProfileView(
+                                              fromHome: false,
+                                              userId: friendUserId,
+                                            ),
+                                      ),
+                                    );
+                                  },
                                   leading: Icon(Icons.account_circle, size: 32),
                                   trailing: IconButton(
                                     icon: Icon(Icons.delete, size: 24),
@@ -410,20 +470,41 @@ class _FriendsViewState extends State<FriendsView> {
                                                       vmodel.isBusy
                                                           ? CircularProgressIndicator()
                                                           : Text('Yes'),
-                                                  onPressed: () {
-                                                    vmodel.deleteFriend(
+                                                  onPressed: () async {
+                                                    await vmodel.deleteFriend(
                                                       friendship,
                                                     );
-                                                    Navigator.pop(context);
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          'Friend deleted: ${vmodel.friends[friendship]!.firstName} ${vmodel.friends[friendship]!.lastName}',
-                                                        ),
-                                                      ),
-                                                    );
+                                                    if (context.mounted) {
+                                                      Navigator.pop(context);
+                                                    }
+
+                                                    if (_viewModel.hasError) {
+                                                      if (context.mounted) {
+                                                        ScaffoldMessenger.of(
+                                                          context,
+                                                        ).showSnackBar(
+                                                          SnackBar(
+                                                            backgroundColor:
+                                                                Colors.red,
+                                                            content: Text(
+                                                              "Error: ${_viewModel.errorMessage!}",
+                                                            ),
+                                                          ),
+                                                        );
+                                                      } else {
+                                                        if (context.mounted) {
+                                                          ScaffoldMessenger.of(
+                                                            context,
+                                                          ).showSnackBar(
+                                                            SnackBar(
+                                                              content: Text(
+                                                                'Friend deleted: ${vmodel.friends[friendship]!.firstName} ${vmodel.friends[friendship]!.lastName}',
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }
+                                                      }
+                                                    }
                                                     _loadData();
                                                   },
                                                 ),
@@ -470,6 +551,99 @@ class _FriendsViewState extends State<FriendsView> {
                                     ),
                                   ),
                                 ),
+                              SizedBox(height: 10),
+                            ],
+                          )
+                          : ListView(
+                            children: [
+                              const ListTile(
+                                title: Text(
+                                  'Sent Requests',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              for (var entry
+                                  in vmodel.pendingRequestsSent.entries)
+                                ListTile(
+                                  onTap: () {
+                                    final friendUserId =
+                                        vmodel
+                                            .pendingRequestsSent[entry.key]!
+                                            .userId;
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder:
+                                            (context) => ProfileView(
+                                              fromHome: false,
+                                              userId: friendUserId,
+                                            ),
+                                      ),
+                                    );
+                                  },
+                                  leading: Icon(Icons.person, size: 32),
+
+                                  title: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        '${entry.value!.firstName} ${entry.value!.lastName}',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        entry.value!.email,
+                                        style: TextStyle(
+                                          color: Colors.grey,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                  trailing: IconButton(
+                                    iconSize: 25,
+                                    icon: const Icon(Icons.close),
+                                    onPressed: () async {
+                                      await _viewModel.cancelFriendRequest(
+                                        entry.value!.userId,
+                                      );
+                                      if (_viewModel.hasError) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              backgroundColor: Colors.red,
+                                              content: Text(
+                                                "Error cancelling friend request: ${_viewModel.errorMessage}",
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              'You have cancelled your friend request to ${entry.value!.firstName} ${entry.value!.lastName}.',
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      _loadData();
+                                    },
+                                  ),
+                                ),
+                              SizedBox(height: 10),
                             ],
                           ),
                 ),

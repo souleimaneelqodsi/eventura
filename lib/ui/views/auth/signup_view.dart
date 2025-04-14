@@ -60,6 +60,7 @@ class SignupView extends StatelessWidget {
                   const SizedBox(height: 40),
                   TextField(
                     controller: _firstNameController,
+                    keyboardType: TextInputType.name,
                     decoration: const InputDecoration(
                       labelText: 'First Name',
                       prefixIcon: Icon(Icons.person),
@@ -68,6 +69,7 @@ class SignupView extends StatelessWidget {
                   const SizedBox(height: 20),
                   TextField(
                     controller: _lastNameController,
+                    keyboardType: TextInputType.name,
                     decoration: const InputDecoration(
                       labelText: 'Last Name',
                       prefixIcon: Icon(Icons.person),

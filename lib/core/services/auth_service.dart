@@ -7,7 +7,7 @@ class AuthService {
   late final GoTrueClient _supabaseAuth;
   late final SupabaseClient _supabaseClient;
 
-  final logger = Logger();
+  final logger = Logger(printer: PrettyPrinter());
 
   AuthService({required SupabaseClient supabaseClient}) {
     _supabaseClient = supabaseClient;
@@ -201,7 +201,7 @@ class AuthService {
     }
   }
 
-  Future<UserModel?> updateUser(UserModel user) async {
+  Future<UserModel?> updateUser(UserModel user, bool testMode) async {
     try {
       final response =
           await _supabaseClient
@@ -209,6 +209,12 @@ class AuthService {
               .update(user.toJson())
               .eq('user_id', user.userId)
               .select();
+      if (!testMode) {
+        if (user.email != _supabaseAuth.currentUser!.email) {
+          await _supabaseAuth.updateUser(UserAttributes(email: user.email));
+          await _supabaseAuth.refreshSession();
+        }
+      }
       if (response.isEmpty) {
         throw Exception(
           "User creation failed: user not found/data not returned",
@@ -216,8 +222,49 @@ class AuthService {
       }
       return UserModel.fromJson(response.first);
     } catch (error) {
-      logger.e("Error during user update.", error: error);
+      logger.e("Error during user update : ${error.toString()}", error: error);
       rethrow;
+    }
+  }
+
+  bool hasVerifiedEmail() {
+    try {
+      _supabaseAuth.refreshSession();
+      final bool hasVerified = _supabaseAuth.currentUser?.newEmail == null;
+      logger.d("Auth Service: $hasVerified");
+      return hasVerified;
+    } catch (error) {
+      logger.e(
+        "Error during email verification check : ${error.toString()}",
+        error: error,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> refresh() async {
+    try {
+      await _supabaseAuth.refreshSession();
+    } catch (e) {
+      logger.e(
+        "Error occurred while refreshing the current session : ${e.toString()}",
+        error: e,
+      );
+      rethrow;
+    }
+  }
+
+  Future<void> resendVerificationEmail() async {
+    try {
+      bool hasVerified = hasVerifiedEmail();
+      if (hasVerified) throw Exception("Email already verified");
+      await _supabaseAuth.resend(
+        type: OtpType.emailChange,
+        email: _supabaseAuth.currentUser!.email,
+      );
+    } catch (e) {
+      logger.e("Error during resend verification email", error: e);
+      throw Exception("Failed to resend verification email : ${e.toString()}");
     }
   }
 }
