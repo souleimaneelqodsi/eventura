@@ -2,6 +2,7 @@ import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
+import 'package:eventura/ui/views/auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -79,7 +80,7 @@ class _ProfileViewState extends State<ProfileView> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Profile')),
-        body: const Center(child: CircularProgressIndicator(color: Colors.red)),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -384,9 +385,7 @@ class _ProfileViewState extends State<ProfileView> {
                                 ),
                                 child:
                                     viewmodel.isBusy
-                                        ? CircularProgressIndicator(
-                                          color: Colors.white,
-                                        )
+                                        ? CircularProgressIndicator()
                                         : SizedBox(
                                           width: 150,
                                           child: Row(
@@ -408,33 +407,25 @@ class _ProfileViewState extends State<ProfileView> {
                                             ],
                                           ),
                                         ),
-                                onPressed: () async {
-                                  await viewmodel.resetPassword();
+                                onPressed: () {
+                                  viewmodel.resetPassword();
                                   if (viewmodel.hasError) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.red,
-                                          content: Text(
-                                            "An error occurred: ${viewmodel.errorMessage}",
-                                          ),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        content: Text(
+                                          "An error occurred: ${viewmodel.errorMessage}",
                                         ),
-                                      );
-                                    } else {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "A password reset email has been sent to your email address.",
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    }
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "A password reset email has been sent to your email address.",
+                                        ),
+                                      ),
+                                    );
                                   }
                                 },
                               ),
@@ -474,33 +465,32 @@ class _ProfileViewState extends State<ProfileView> {
                                             ],
                                           ),
                                         ),
-                                onPressed: () async {
-                                  await viewmodel.signOut();
+                                onPressed: () {
+                                  viewmodel.signOut();
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LoginView(),
+                                    ),
+                                    (Route<dynamic> route) => false,
+                                  );
                                   if (viewmodel.hasError) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.red,
-                                          content: Text(
-                                            "An error occurred while signing out. Please try again later or contact support: ${viewmodel.errorMessage}",
-                                          ),
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        content: Text(
+                                          "An error occurred while signing out. Please try again later or contact support: ${viewmodel.errorMessage}",
                                         ),
-                                      );
-                                    } else {
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "You have been signed out. See you soon on Eventura!",
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    }
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "You have been signed out. See you soon on Eventura!",
+                                        ),
+                                      ),
+                                    );
                                   }
                                 },
                               ),
@@ -678,9 +668,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                               child:
                                   viewmodel.isBusy
-                                      ? const CircularProgressIndicator(
-                                        color: Colors.white,
-                                      )
+                                      ? const CircularProgressIndicator()
                                       : SizedBox(
                                         width: 150,
                                         child: Row(

@@ -173,7 +173,7 @@ class ProfileViewmodel extends BaseViewmodel {
   Future<void> resetPassword() async {
     try {
       setBusy(true);
-      if (isCurrentUserProfile) {
+      if (!isCurrentUserProfile) {
         throw Exception("Cannot reset password for another user.");
       }
       await userService.resetPassword(user!.email);

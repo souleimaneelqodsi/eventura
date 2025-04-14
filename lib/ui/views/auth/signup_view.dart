@@ -13,135 +13,144 @@ class SignupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sign Up')),
-      body: Consumer<SignupViewmodel>(
-        builder: (context, viewModel, _) {
-          return Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textCapitalization: TextCapitalization.none,
-                    autocorrect: false,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: const Icon(Icons.email),
-                      errorText:
-                          viewModel.hasError &&
-                                  viewModel.errorMessage!
-                                      .toLowerCase()
-                                      .contains("email")
-                              ? viewModel.errorMessage
-                              : null,
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Sign Up')),
+        body: Consumer<SignupViewmodel>(
+          builder: (context, viewModel, _) {
+            return Padding(
+              padding: const EdgeInsets.all(32.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      textCapitalization: TextCapitalization.none,
+                      autocorrect: false,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: const Icon(Icons.email),
+                        errorText:
+                            viewModel.hasError &&
+                                    viewModel.errorMessage!
+                                        .toLowerCase()
+                                        .contains("email")
+                                ? viewModel.errorMessage
+                                : null,
+                        errorMaxLines: 4,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock),
-                      errorText:
-                          viewModel.hasError &&
-                                  viewModel.errorMessage!
-                                      .toLowerCase()
-                                      .contains("password")
-                              ? viewModel.errorMessage
-                              : null,
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: const Icon(Icons.lock),
+                        errorText:
+                            viewModel.hasError &&
+                                    viewModel.errorMessage!
+                                        .toLowerCase()
+                                        .contains("password")
+                                ? viewModel.errorMessage
+                                : null,
+                        errorMaxLines: 5,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 40),
-                  TextField(
-                    controller: _firstNameController,
-                    keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                      labelText: 'First Name',
-                      prefixIcon: Icon(Icons.person),
+                    const SizedBox(height: 40),
+                    TextField(
+                      controller: _firstNameController,
+                      keyboardType: TextInputType.name,
+                      decoration: const InputDecoration(
+                        labelText: 'First Name',
+                        prefixIcon: Icon(Icons.person),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  TextField(
-                    controller: _lastNameController,
-                    keyboardType: TextInputType.name,
-                    decoration: const InputDecoration(
-                      labelText: 'Last Name',
-                      prefixIcon: Icon(Icons.person),
+                    const SizedBox(height: 20),
+                    TextField(
+                      controller: _lastNameController,
+                      keyboardType: TextInputType.name,
+                      decoration: const InputDecoration(
+                        labelText: 'Last Name',
+                        prefixIcon: Icon(Icons.person),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 50),
-                  Center(
-                    child: ElevatedButton(
-                      onPressed:
-                          viewModel.isBusy
-                              ? null
-                              : () async {
-                                await viewModel.signUp(
-                                  context,
-                                  email: _emailController.text.trim(),
-                                  password: _passwordController.text,
-                                  firstName: _firstNameController.text,
-                                  lastName: _lastNameController.text,
-                                );
-                                if (!viewModel.hasError && context.mounted) {
-                                  _showConfirmationDialog(context);
-                                }
-                              },
-                      child:
-                          viewModel.isBusy
-                              ? const CircularProgressIndicator()
-                              : const Text(
-                                'Sign Up',
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                    const SizedBox(height: 50),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed:
+                            viewModel.isBusy
+                                ? null
+                                : () {
+                                  viewModel.signUp(
+                                    context,
+                                    email: _emailController.text.trim(),
+                                    password: _passwordController.text,
+                                    firstName: _firstNameController.text,
+                                    lastName: _lastNameController.text,
+                                  );
+                                  if (!viewModel.hasError) {
+                                    _emailController.clear();
+                                    _passwordController.clear();
+                                    _firstNameController.clear();
+                                    _lastNameController.clear();
+                                    _showConfirmationDialog(context);
+                                  }
+                                },
+                        child:
+                            viewModel.isBusy
+                                ? const CircularProgressIndicator()
+                                : const Text(
+                                  'Sign Up',
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                      ),
+                    ),
+                    if (viewModel.hasError &&
+                        !viewModel.errorMessage!.toLowerCase().contains(
+                          RegExp("password|email"),
+                        ))
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20.0),
+                        child: Text(
+                          'Error: ${viewModel.errorMessage}',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    const SizedBox(height: 30),
+                    Center(
+                      child: Text.rich(
+                        TextSpan(
+                          text: "Already have an account? ",
+                          children: [
+                            TextSpan(
+                              text: "Sign In",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.deepPurple,
                               ),
-                    ),
-                  ),
-                  if (viewModel.hasError &&
-                      !viewModel.errorMessage!.toLowerCase().contains(
-                        RegExp("password|email"),
-                      ))
-                    Padding(
-                      padding: const EdgeInsets.only(top: 20.0),
-                      child: Text(
-                        'Error: ${viewModel.errorMessage}',
-                        style: const TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  const SizedBox(height: 30),
-                  Center(
-                    child: Text.rich(
-                      TextSpan(
-                        text: "Already have an account? ",
-                        children: [
-                          TextSpan(
-                            text: "Sign In",
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple,
+                              recognizer:
+                                  TapGestureRecognizer()
+                                    ..onTap =
+                                        () => Navigator.pushReplacementNamed(
+                                          context,
+                                          "/login",
+                                        ),
                             ),
-                            recognizer:
-                                TapGestureRecognizer()
-                                  ..onTap =
-                                      () => Navigator.pushReplacementNamed(
-                                        context,
-                                        "/login",
-                                      ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
