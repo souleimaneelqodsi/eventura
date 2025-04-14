@@ -2,6 +2,7 @@ import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
+import 'package:eventura/ui/views/auth/login_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
@@ -79,7 +80,7 @@ class _ProfileViewState extends State<ProfileView> {
     if (isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Profile')),
-        body: const Center(child: CircularProgressIndicator(color: Colors.red)),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -370,6 +371,131 @@ class _ProfileViewState extends State<ProfileView> {
                             ],
                           ),
                         SizedBox(height: 10),
+                        if (isCurrentUser)
+                          Column(
+                            children: [
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 13,
+                                  ),
+                                ),
+                                child:
+                                    viewmodel.isBusy
+                                        ? CircularProgressIndicator()
+                                        : SizedBox(
+                                          width: 150,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.password,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 7),
+                                              Text(
+                                                "Reset Password",
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                onPressed: () {
+                                  viewmodel.resetPassword();
+                                  if (viewmodel.hasError) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        content: Text(
+                                          "An error occurred: ${viewmodel.errorMessage}",
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "A password reset email has been sent to your email address.",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                              SizedBox(height: 16),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.grey,
+                                  foregroundColor: Colors.white,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 13,
+                                  ),
+                                ),
+                                child:
+                                    viewmodel.isBusy
+                                        ? CircularProgressIndicator(
+                                          color: Colors.white,
+                                        )
+                                        : SizedBox(
+                                          width: 100,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.logout,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(width: 5),
+                                              Text(
+                                                "Sign Out",
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                onPressed: () {
+                                  viewmodel.signOut();
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LoginView(),
+                                    ),
+                                    (Route<dynamic> route) => false,
+                                  );
+                                  if (viewmodel.hasError) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        backgroundColor: Colors.red,
+                                        content: Text(
+                                          "An error occurred while signing out. Please try again later or contact support: ${viewmodel.errorMessage}",
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          "You have been signed out. See you soon on Eventura!",
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         if (!isCurrentUser &&
                             !isFriend() &&
                             isIncomingRequest())
@@ -542,9 +668,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                               child:
                                   viewmodel.isBusy
-                                      ? const CircularProgressIndicator(
-                                        color: Colors.white,
-                                      )
+                                      ? const CircularProgressIndicator()
                                       : SizedBox(
                                         width: 150,
                                         child: Row(
