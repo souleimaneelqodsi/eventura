@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:eventura/core/models/friends.dart';
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart' show AuthService;

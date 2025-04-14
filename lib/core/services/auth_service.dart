@@ -201,7 +201,7 @@ class AuthService {
     }
   }
 
-  Future<UserModel?> updateUser(UserModel user) async {
+  Future<UserModel?> updateUser(UserModel user, bool testMode) async {
     try {
       final response =
           await _supabaseClient
@@ -209,9 +209,11 @@ class AuthService {
               .update(user.toJson())
               .eq('user_id', user.userId)
               .select();
-      if (user.email != _supabaseAuth.currentUser!.email) {
-        await _supabaseAuth.updateUser(UserAttributes(email: user.email));
-        await _supabaseAuth.refreshSession();
+      if (!testMode) {
+        if (user.email != _supabaseAuth.currentUser!.email) {
+          await _supabaseAuth.updateUser(UserAttributes(email: user.email));
+          await _supabaseAuth.refreshSession();
+        }
       }
       if (response.isEmpty) {
         throw Exception(
@@ -229,6 +231,7 @@ class AuthService {
     try {
       _supabaseAuth.refreshSession();
       final bool hasVerified = _supabaseAuth.currentUser?.newEmail == null;
+      logger.d("Auth Service: $hasVerified");
       return hasVerified;
     } catch (error) {
       logger.e(

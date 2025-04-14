@@ -146,7 +146,7 @@ class ProfileViewmodel extends BaseViewmodel {
         throw Exception("Cannot update another user's profile.");
       }
 
-      await userService.updateUser(user);
+      await userService.updateUser(user, false);
       _user = user;
       notifyListeners();
     } catch (e) {
