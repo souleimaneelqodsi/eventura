@@ -4,9 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class SettingsService {
   bool _isLightMode = true;
 
+  bool get isLightMode => _isLightMode;
+
   Future<void> loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    _isLightMode = prefs.getBool('light_mode') ?? true; 
+    _isLightMode = prefs.getBool('light_mode') ?? true;
   }
 
   Future<Settings> getAllSettings() async {

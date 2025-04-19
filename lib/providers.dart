@@ -1,4 +1,3 @@
-// providers.dart
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/services/event_service.dart';
 import 'package:eventura/core/services/friend_service.dart';
@@ -10,7 +9,6 @@ import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:eventura/core/viewmodels/events_list_viewmodel.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/messages_list_viewmodel.dart';
-// import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
 import 'package:provider/provider.dart';

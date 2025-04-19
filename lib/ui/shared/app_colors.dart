@@ -20,8 +20,9 @@ class AppColors {
   static const Color onSuccessGreen = Colors.white;
 
   // Secondary Action / Subtle (Grey for sign out, some text)
-  static const Color secondaryGrey = Color(0xFF757575); // Grey 600
-  static const Color onSecondaryGrey = Colors.white;
+  static const Color secondaryGrey = Color(0xFFF2F2F2);
+  static const Color onSecondaryGrey = Color(0xFF4D4D4D);
+  static const Color onSecondaryGreyVariant = Color(0xFFA6A6A6);
 
   // Link Color (DeepPurple used for clickable text spans)
   static const Color linkPurple = primaryPurple;

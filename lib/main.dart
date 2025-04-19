@@ -2,6 +2,7 @@ import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
 import 'package:eventura/providers.dart';
+import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/shared/app_theme.dart';
 import 'package:eventura/ui/static/about_us.dart';
 import 'package:eventura/ui/static/contact_us.dart';
@@ -22,7 +23,8 @@ import 'package:eventura/ui/widgets/auth_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:flutter_launcher_icons/android.dart';
+import 'package:logger/logger.dart';
+
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -39,8 +41,8 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  final settingsViewModel = SettingsViewmodel(); // Create instance
-  await settingsViewModel.loadSettings(); // Await initial settings load *here
+  final settingsViewModel = SettingsViewmodel();
+  await settingsViewModel.loadSettings();
   runApp(
     MultiProvider(
       providers: [
@@ -57,6 +59,35 @@ Future<void> main() async {
 }
 
 final supabase = Supabase.instance.client;
+final logger = Logger();
+
+class NavigationObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+
+    if (route.settings.name == '/login') {
+      _cancelSubscriptions();
+    }
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute?.settings.name == '/login') {
+      _cancelSubscriptions();
+    }
+  }
+
+  void _cancelSubscriptions() {
+    try {
+      final supabase = Supabase.instance.client;
+      supabase.removeAllChannels();
+    } catch (e) {
+      logger.e("Error clearing subscriptions: $e", error: e);
+    }
+  }
+}
 
 class Eventura extends StatelessWidget {
   const Eventura({super.key});
@@ -72,10 +103,49 @@ class Eventura extends StatelessWidget {
           themeMode:
               viewmodel.settings.lightMode ? ThemeMode.light : ThemeMode.dark,
           initialRoute: '/',
+          navigatorObservers: [NavigationObserver()],
+          onGenerateRoute: (settings) {
+            if (settings.name == '/') {
+              return MaterialPageRoute(
+                settings: settings,
+                builder: (context) => const AuthWrapper(),
+              );
+            }
+
+            if (settings.name == '/event_detail') {
+              final eventId = settings.arguments as int?;
+              if (eventId == null) {
+                return MaterialPageRoute(
+                  settings: settings,
+                  builder:
+                      (context) => Scaffold(
+                        appBar: AppBar(title: const Text("Error")),
+                        body: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Text(
+                              "Error: No Event ID provided",
+                              style: TextStyle(color: AppColors.errorRed),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
+                      ),
+                );
+              }
+              return MaterialPageRoute(
+                settings: settings,
+                builder: (context) => EventDetailView(eventId: eventId),
+              );
+            }
+
+            return null;
+          },
           routes: {
             '/': (context) => const AuthWrapper(),
             '/login': (context) => LoginView(),
             '/signup': (context) => SignupView(),
+
             '/reset_password': (context) => ResetPasswordView(),
             '/welcome': (context) => WelcomeView(),
             '/home': (context) => HomepageView(),
@@ -89,7 +159,7 @@ class Eventura extends StatelessWidget {
                   body: Center(
                     child: Text(
                       "Error: No Event ID",
-                      style: TextStyle(color: Colors.red),
+                      style: TextStyle(color: AppColors.errorRed),
                     ),
                   ),
                 );
@@ -103,10 +173,8 @@ class Eventura extends StatelessWidget {
               final userId = args as String?;
               final finalUserId = userId ?? supabase.auth.currentUser!.id;
 
-              print('Navigating to profile with userId: $finalUserId');
-
               return ChangeNotifierProvider(
-                key: ValueKey('profile_route_$finalUserId'), // Add a unique key
+                key: ValueKey('profile_route_$finalUserId'),
                 create:
                     (context) => ProfileViewmodel(
                       userService: Provider.of<AuthService>(
@@ -115,7 +183,11 @@ class Eventura extends StatelessWidget {
                       ),
                       userId: finalUserId,
                     ),
-                child: ProfileView(userId: finalUserId, fromHome: false),
+                child: ProfileView(
+                  userId: finalUserId,
+                  fromHome: false,
+                  key: ValueKey('profile_$finalUserId'),
+                ),
               );
             },
             '/settings': (context) => SettingsView(),

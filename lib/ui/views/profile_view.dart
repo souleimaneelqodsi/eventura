@@ -3,10 +3,10 @@ import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
 import 'package:eventura/ui/views/auth/login_view.dart';
+import 'package:eventura/ui/widgets/destructive_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
-// import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ProfileView extends StatefulWidget {
   final String userId;
@@ -157,10 +157,14 @@ class _ProfileViewState extends State<ProfileView> {
       return false;
     }
 
-    if (!_controllersInitialized) {
+    initializeControllers() {
       firstNameController.text = user.firstName ?? '';
       lastNameController.text = user.lastName ?? '';
       emailController.text = user.email;
+    }
+
+    if (!_controllersInitialized) {
+      initializeControllers();
       _controllersInitialized = true;
     }
 
@@ -267,6 +271,8 @@ class _ProfileViewState extends State<ProfileView> {
                                             ),
                                           ),
                                         );
+                                        editingState.toggleEditing();
+                                        return;
                                       } else {
                                         final updatedUser = user.copyWith(
                                           firstName: firstNameController.text,
@@ -275,32 +281,38 @@ class _ProfileViewState extends State<ProfileView> {
                                         );
 
                                         await viewmodel.updateUser(updatedUser);
-                                      }
-                                      if (!viewmodel.hasError) {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            const SnackBar(
-                                              content: Text("Profile updated"),
-                                            ),
-                                          );
-                                          _loadData();
-                                        }
-                                      } else {
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                "Error updating profile : ${viewmodel.errorMessage}",
+                                        if (!viewmodel.hasError) {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  "Profile updated",
+                                                ),
                                               ),
-                                            ),
-                                          );
+                                            );
+                                            _loadData();
+                                            editingState.toggleEditing();
+                                            return;
+                                          }
+                                        } else {
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  "Error updating profile : ${viewmodel.errorMessage}",
+                                                ),
+                                              ),
+                                            );
+                                            initializeControllers();
+                                            editingState.toggleEditing();
+                                            return;
+                                          }
                                         }
                                       }
-                                      editingState.toggleEditing();
                                     },
                                     child: const Text(
                                       'Save Changes',
@@ -375,44 +387,37 @@ class _ProfileViewState extends State<ProfileView> {
                           Column(
                             children: [
                               ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  // backgroundColor: Colors.grey,
-                                  // foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 13,
+                                style: Theme.of(
+                                  context,
+                                ).elevatedButtonTheme.style?.copyWith(
+                                  minimumSize: WidgetStateProperty.all(
+                                    const Size(200, 48),
                                   ),
                                 ),
                                 child:
                                     viewmodel.isBusy
-                                        ? CircularProgressIndicator()
-                                        : SizedBox(
-                                          width: 150,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.password,
-                                                color: Colors.white,
-                                              ),
-                                              SizedBox(width: 7),
-                                              Text(
-                                                "Reset Password",
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                        ? const CircularProgressIndicator()
+                                        : Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.password,
+                                              color:
+                                                  Theme.of(
+                                                    context,
+                                                  ).colorScheme.onPrimary,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Text("Reset Password"),
+                                          ],
                                         ),
                                 onPressed: () {
                                   viewmodel.resetPassword();
                                   if (viewmodel.hasError) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        backgroundColor: Colors.red,
                                         content: Text(
                                           "An error occurred: ${viewmodel.errorMessage}",
                                         ),
@@ -431,59 +436,54 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                               SizedBox(height: 16),
                               ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  // backgroundColor: Colors.grey,
-                                  // foregroundColor: Colors.white,
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 20,
-                                    vertical: 13,
+                                style: Theme.of(
+                                  context,
+                                ).elevatedButtonTheme.style?.copyWith(
+                                  backgroundColor: WidgetStateProperty.all(
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.secondaryContainer,
+                                  ),
+                                  foregroundColor: WidgetStateProperty.all(
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onSecondaryContainer,
+                                  ),
+                                  minimumSize: WidgetStateProperty.all(
+                                    const Size(200, 48),
                                   ),
                                 ),
                                 child:
                                     viewmodel.isBusy
-                                        ? CircularProgressIndicator(
-                                          color: Colors.white,
-                                        )
-                                        : SizedBox(
-                                          width: 100,
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              Icon(
-                                                Icons.logout,
-                                                color: Colors.white,
-                                              ),
-                                              SizedBox(width: 5),
-                                              Text(
-                                                "Sign Out",
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
+                                        ? CircularProgressIndicator()
+                                        : Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(Icons.logout),
+                                            const SizedBox(width: 8),
+                                            const Text("Sign Out"),
+                                          ],
                                         ),
                                 onPressed: () {
                                   viewmodel.signOut();
-                                  Navigator.pushAndRemoveUntil(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => LoginView(),
-                                    ),
-                                    (Route<dynamic> route) => false,
-                                  );
                                   if (viewmodel.hasError) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        backgroundColor: Colors.red,
                                         content: Text(
                                           "An error occurred while signing out. Please try again later or contact support: ${viewmodel.errorMessage}",
                                         ),
                                       ),
                                     );
                                   } else {
+                                    Navigator.pushAndRemoveUntil(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginView(),
+                                      ),
+                                      (Route<dynamic> route) => false,
+                                    );
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
                                         content: Text(
@@ -515,7 +515,6 @@ class _ProfileViewState extends State<ProfileView> {
 
                                     style: TextStyle(
                                       fontSize: 16,
-                                      color: Colors.black,
                                       fontStyle: FontStyle.italic,
                                     ),
                                   ),
@@ -542,7 +541,6 @@ class _ProfileViewState extends State<ProfileView> {
                                                   context,
                                                 ).showSnackBar(
                                                   SnackBar(
-                                                    backgroundColor: Colors.red,
                                                     content: Text(
                                                       "Error accepting friend request. Please try again or contact support: ${viewmodel.errorMessage}",
                                                     ),
@@ -605,7 +603,6 @@ class _ProfileViewState extends State<ProfileView> {
                                                   context,
                                                 ).showSnackBar(
                                                   SnackBar(
-                                                    backgroundColor: Colors.red,
                                                     content: Text(
                                                       "Error rejecting friend request. Please try again or contact support: ${viewmodel.errorMessage}",
                                                     ),
@@ -656,42 +653,15 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                         if (!isCurrentUser && isFriend())
                           Padding(
-                            padding: EdgeInsets.only(top: 20),
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 30,
-                                  vertical: 13,
-                                ),
-                                foregroundColor: Colors.white,
-                                backgroundColor: Colors.red,
-                              ),
-                              child:
-                                  viewmodel.isBusy
-                                      ? const CircularProgressIndicator()
-                                      : SizedBox(
-                                        width: 150,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-
-                                          children: [
-                                            Icon(
-                                              Icons.delete,
-                                              size: 18,
-                                              color: Colors.white,
-                                            ),
-                                            SizedBox(width: 5.0),
-                                            const Text(
-                                              "Delete friend",
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16.0,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                            padding: EdgeInsets.only(
+                              top: 20,
+                              left: 60,
+                              right: 60,
+                            ),
+                            child: DestructiveButton(
+                              label: 'Delete Friend',
+                              isLoading: viewmodel.isBusy,
+                              icon: Icons.delete,
                               onPressed: () async {
                                 final alert = AlertDialog(
                                   title: Text(
@@ -711,58 +681,42 @@ class _ProfileViewState extends State<ProfileView> {
                                         await viewmodel.deleteFriend(context);
 
                                         if (viewmodel.hasError) {
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                backgroundColor: Colors.red,
-                                                content: Text(
-                                                  "Error deleting friend. Please try again or contact support: ${viewmodel.errorMessage}",
-                                                ),
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Error deleting friend. Please try again or contact support: ${viewmodel.errorMessage}",
                                               ),
-                                            );
-                                          }
+                                            ),
+                                          );
                                         } else {
-                                          if (context.mounted) {
-                                            if (context.mounted) {
-                                              Navigator.pop(context);
-                                              Navigator.pop(context);
-                                              await Provider.of<
-                                                FriendsViewmodel
-                                              >(
-                                                context,
-                                                listen: false,
-                                              ).fetchFriendsAndRequests(
-                                                viewmodel
-                                                    .userService
-                                                    .currentUser!
-                                                    .id,
-                                                context,
-                                              );
-                                            }
-                                            if (context.mounted) {
-                                              ScaffoldMessenger.of(
-                                                context,
-                                              ).showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                    "Friend deleted: ${user.firstName} ${user.lastName}",
-                                                  ),
-                                                ),
-                                              );
-                                            }
-                                          }
+                                          Navigator.pop(context);
+                                          Navigator.pop(context);
+                                          await Provider.of<FriendsViewmodel>(
+                                            context,
+                                            listen: false,
+                                          ).fetchFriendsAndRequests(
+                                            viewmodel
+                                                .userService
+                                                .currentUser!
+                                                .id,
+                                            context,
+                                          );
                                         }
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Friend deleted: ${user.firstName} ${user.lastName}",
+                                            ),
+                                          ),
+                                        );
                                       },
                                     ),
                                     TextButton(
-                                      child: Text(
-                                        "No",
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: Text("No"),
                                       onPressed: () {
                                         Navigator.pop(context);
                                       },
@@ -793,27 +747,22 @@ class _ProfileViewState extends State<ProfileView> {
                               onPressed: () async {
                                 await viewmodel.addFriend(context);
                                 if (viewmodel.hasError) {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        backgroundColor: Colors.red,
-                                        content: Text(
-                                          "Error adding friend: an error occurred or this person is already your friend: ${viewmodel.errorMessage}",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Error adding friend: an error occurred or this person is already your friend: ${viewmodel.errorMessage}",
+                                        style: TextStyle(color: Colors.white),
                                       ),
-                                    );
-                                  }
+                                    ),
+                                  );
                                 } else {
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "Friend request sent successfully!",
-                                        ),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Friend request sent successfully!",
                                       ),
-                                    );
-                                  }
+                                    ),
+                                  );
                                 }
                               },
                               child:
@@ -881,7 +830,6 @@ class _ProfileViewState extends State<ProfileView> {
                                               context,
                                             ).showSnackBar(
                                               SnackBar(
-                                                backgroundColor: Colors.red,
                                                 content: Text(
                                                   "Error canceling friend request. Please try again or contact support: ${viewmodel.errorMessage}",
                                                 ),

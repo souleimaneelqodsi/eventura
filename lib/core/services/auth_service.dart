@@ -201,20 +201,49 @@ class AuthService {
     }
   }
 
+  Future<bool> _isEmailAvailableForUpdate(String newEmail) async {
+    try {
+      final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+      if (!emailRegex.hasMatch(newEmail)) {
+        throw Exception("Invalid email format");
+      }
+
+      final response = await _supabaseClient
+          .from('users')
+          .select('user_id')
+          .eq('email', newEmail);
+
+      if (response.isNotEmpty) {
+        if (response.first['user_id'] == _supabaseAuth.currentUser!.id) {
+          return true;
+        }
+        throw Exception(
+          "This email is already associated with another account",
+        );
+      }
+
+      return true;
+    } catch (error) {
+      logger.e("Error checking email availability", error: error);
+      rethrow;
+    }
+  }
+
   Future<UserModel?> updateUser(UserModel user, bool testMode) async {
     try {
+      if (!testMode) {
+        if (user.email != _supabaseAuth.currentUser!.email) {
+          await _isEmailAvailableForUpdate(user.email);
+          await _supabaseAuth.updateUser(UserAttributes(email: user.email));
+          await _supabaseAuth.refreshSession();
+        }
+      }
       final response =
           await _supabaseClient
               .from('users')
               .update(user.toJson())
               .eq('user_id', user.userId)
               .select();
-      if (!testMode) {
-        if (user.email != _supabaseAuth.currentUser!.email) {
-          await _supabaseAuth.updateUser(UserAttributes(email: user.email));
-          await _supabaseAuth.refreshSession();
-        }
-      }
       if (response.isEmpty) {
         throw Exception(
           "User creation failed: user not found/data not returned",
@@ -231,7 +260,6 @@ class AuthService {
     try {
       _supabaseAuth.refreshSession();
       final bool hasVerified = _supabaseAuth.currentUser?.newEmail == null;
-      logger.d("Auth Service: $hasVerified");
       return hasVerified;
     } catch (error) {
       logger.e(

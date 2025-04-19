@@ -1,5 +1,7 @@
 import 'package:eventura/core/services/auth_service.dart';
+
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
+import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
 import 'package:eventura/ui/views/events_list_view.dart';
 import 'package:eventura/ui/views/friends_view.dart';
@@ -34,8 +36,10 @@ class _HomepageViewState extends State<HomepageView> {
 
   final _pressedStyle =
       (int i, int currentPage) => ElevatedButton.styleFrom(
-        backgroundColor: currentPage == i ? Colors.purple : null,
-        foregroundColor: currentPage == i ? Colors.white : null,
+        backgroundColor:
+            currentPage == i ? Colors.purple : AppColors.secondaryGrey,
+        foregroundColor:
+            currentPage == i ? Colors.white : AppColors.onSecondaryGrey,
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       );
 
@@ -43,6 +47,7 @@ class _HomepageViewState extends State<HomepageView> {
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
     final currentUserId = authService.currentUser!.id;
+    final titleMedium = Theme.of(context).textTheme.titleMedium;
 
     final profileView = ProfileView(userId: currentUserId, fromHome: true);
     return ChangeNotifierProvider.value(
@@ -116,90 +121,52 @@ class _HomepageViewState extends State<HomepageView> {
                         children: [
                           SizedBox(
                             height: 125,
-                            child: const DrawerHeader(
+                            child: DrawerHeader(
                               child: Text(
                                 'Menu',
-                                style: TextStyle(
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
                           SizedBox(height: 16),
                           ListTile(
-                            title: const Text(
-                              'Home',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            title: Text('Home', style: titleMedium),
                             onTap: () {
                               Navigator.pushNamed(context, '/home');
                             },
                           ),
                           const Divider(indent: 7, thickness: 2),
                           ListTile(
-                            title: const Text(
-                              'Profile',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            title: Text('Profile', style: titleMedium),
                             onTap: () {
                               Navigator.pushNamed(context, '/profile');
                             },
                           ),
                           const Divider(indent: 7, thickness: 2),
                           ListTile(
-                            title: const Text(
-                              'Settings',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            title: Text('Settings', style: titleMedium),
                             onTap: () {
                               Navigator.pushNamed(context, '/settings');
                             },
                           ),
                           const Divider(indent: 7, thickness: 2),
                           ListTile(
-                            title: const Text(
-                              'FAQ',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            title: Text('FAQ', style: titleMedium),
                             onTap: () {
                               Navigator.pushNamed(context, '/faq');
                             },
                           ),
                           const Divider(indent: 7, thickness: 2),
                           ListTile(
-                            title: const Text(
-                              'About',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            title: Text('About', style: titleMedium),
                             onTap: () {
                               Navigator.pushNamed(context, '/about');
                             },
                           ),
                           const Divider(indent: 7, thickness: 2),
                           ListTile(
-                            title: const Text(
-                              'Contact',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            title: Text('Contact', style: titleMedium),
                             onTap: () {
                               Navigator.pushNamed(context, '/contact');
                             },
@@ -212,7 +179,10 @@ class _HomepageViewState extends State<HomepageView> {
                       child: Text(
                         "Version 1.0.0",
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: AppColors.onSecondaryGrey,
+                        ),
                       ),
                     ),
                     SizedBox(height: 48.0),
@@ -248,12 +218,7 @@ class _HomepageViewState extends State<HomepageView> {
                                       onPressed: () {
                                         setState(() => _eventTypeIndex = 1);
                                       },
-                                      child: const Text(
-                                        'My Events',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: const Text('My Events'),
                                     ),
                                     SizedBox(width: 10),
                                     ElevatedButton(
@@ -261,12 +226,7 @@ class _HomepageViewState extends State<HomepageView> {
                                       onPressed: () {
                                         setState(() => _eventTypeIndex = 2);
                                       },
-                                      child: const Text(
-                                        'Events',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: const Text('Events'),
                                     ),
                                     SizedBox(width: 10),
                                     ElevatedButton(
@@ -274,12 +234,7 @@ class _HomepageViewState extends State<HomepageView> {
                                       onPressed: () {
                                         setState(() => _eventTypeIndex = 3);
                                       },
-                                      child: const Text(
-                                        'Invitations',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
+                                      child: const Text('Invitations'),
                                     ),
                                   ],
                                 ),

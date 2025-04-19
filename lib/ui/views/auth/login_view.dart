@@ -1,4 +1,5 @@
 import 'package:eventura/core/viewmodels/auth/login_viewmodel.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -23,6 +24,7 @@ class LoginView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Image.asset('assets/icon/icon.png', height: 100),
                     const SizedBox(height: 20),
                     TextField(
                       controller: _emailController,
@@ -84,10 +86,7 @@ class LoginView extends StatelessWidget {
                         child:
                             viewModel.isBusy
                                 ? const CircularProgressIndicator()
-                                : const Text(
-                                  'Sign In',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                                : const Text('Sign In'),
                       ),
                     ),
                     if (viewModel.hasError &&
@@ -101,10 +100,6 @@ class LoginView extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Text(
                           viewModel.errorMessage ?? "An unknown error occurred",
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                          ),
                         ),
                       ),
                     const SizedBox(height: 40),
@@ -115,9 +110,10 @@ class LoginView extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: "Sign Up",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
                               ),
                               recognizer:
                                   TapGestureRecognizer()

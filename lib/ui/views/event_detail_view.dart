@@ -1,4 +1,7 @@
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
+import 'package:eventura/ui/shared/app_colors.dart';
+
+import 'package:eventura/ui/widgets/destructive_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -25,7 +28,7 @@ class EventDetailView extends StatelessWidget {
               child: Center(
                 child: Text(
                   "An error occurred: ${vmodel.errorMessage}",
-                  style: TextStyle(color: Colors.red, fontSize: 20),
+                  style: TextStyle(color: AppColors.errorRed, fontSize: 20),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -42,10 +45,7 @@ class EventDetailView extends StatelessWidget {
               children: [
                 Text(
                   event.title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 30),
                 RichText(
@@ -53,13 +53,16 @@ class EventDetailView extends StatelessWidget {
                     children: <TextSpan>[
                       TextSpan(
                         text: "Location",
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           decoration: TextDecoration.underline,
                           decorationThickness: 2,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextSpan(text: " : ${event.title}"),
+                      TextSpan(
+                        text: " : ${event.title}",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -69,13 +72,16 @@ class EventDetailView extends StatelessWidget {
                     children: <TextSpan>[
                       TextSpan(
                         text: "Description",
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           decoration: TextDecoration.underline,
                           decorationThickness: 2,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      TextSpan(text: " : ${event.description}"),
+                      TextSpan(
+                        text: " : ${event.description}",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ),
@@ -84,7 +90,8 @@ class EventDetailView extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    ElevatedButton(
+                    DestructiveButton(
+                      icon: Icons.delete,
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -95,59 +102,47 @@ class EventDetailView extends StatelessWidget {
                                   "Are you sure you want to delete this event?",
                                 ),
                                 actions: [
-                                  TextButton(
+                                  ElevatedButton(
                                     onPressed: () => Navigator.pop(context),
                                     child: const Text("Cancel"),
                                   ),
-                                  ElevatedButton(
-                                    onPressed: () async {
-                                      await vmodel.deleteEvent(
-                                        context,
-                                        vmodel.event!.eventId!,
-                                      );
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
+                                  Padding(
+                                    padding: const EdgeInsets.all(12.0),
+                                    child: DestructiveButton(
+                                      icon: Icons.delete,
+                                      onPressed: () async {
+                                        await vmodel.deleteEvent(
                                           context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content:
-                                                vmodel.hasError
-                                                    ? Text(vmodel.errorMessage!)
-                                                    : Text(
-                                                      "Event deleted successfully",
-                                                    ),
-                                          ),
+                                          vmodel.event!.eventId!,
                                         );
-                                        Navigator.pop(context);
-                                      }
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
-                                    ),
-                                    child:
-                                        vmodel.isBusy
-                                            ? CircularProgressIndicator()
-                                            : Text(
-                                              "Delete",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content:
+                                                  vmodel.hasError
+                                                      ? Text(
+                                                        vmodel.errorMessage!,
+                                                      )
+                                                      : Text(
+                                                        "Event deleted successfully",
+                                                      ),
                                             ),
+                                          );
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      label: "Delete",
+                                      isLoading: vmodel.isBusy,
+                                    ),
                                   ),
                                 ],
                               ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                      ),
-                      child: const Text(
-                        "Delete",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      label: "Delete",
+                      isLoading: vmodel.isBusy,
                     ),
                   ],
                 ),
