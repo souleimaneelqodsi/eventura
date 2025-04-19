@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
