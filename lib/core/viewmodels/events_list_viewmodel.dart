@@ -1,9 +1,9 @@
-// events_list_viewmodel.dart
 import 'dart:async';
 
 import 'package:eventura/core/models/event.dart';
 import 'package:eventura/core/services/event_service.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
+
 import 'package:logger/logger.dart';
 
 class EventListViewmodel extends BaseViewmodel {
@@ -28,6 +28,7 @@ class EventListViewmodel extends BaseViewmodel {
 
   Future<void> refreshEvents() async {
     _subscribeToEvents();
+    notifyListeners();
   }
 
   void _subscribeToEvents() {

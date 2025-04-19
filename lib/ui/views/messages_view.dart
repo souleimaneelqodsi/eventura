@@ -1,3 +1,4 @@
+import 'package:eventura/ui/static/coming_soon.dart';
 import 'package:flutter/material.dart';
 
 class MessagesView extends StatelessWidget {
@@ -5,8 +6,6 @@ class MessagesView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Coming soon! ⏳', style: TextStyle(fontSize: 24)),
-    );
+    return ComingSoon(title: "Messages");
   }
 }

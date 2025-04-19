@@ -53,6 +53,7 @@ app.*.map.json
 # private files
 ideas.md
 last_checkpoint.md
+errors.txt
 
 # Ignore everything
 /*
@@ -63,7 +64,6 @@ last_checkpoint.md
 !/assets/
 !/test/
 !/pubspec.yaml
-!/pubspec.lock
 !/README.md
 !/analysis_options.yaml
 !/devtools_options.yaml

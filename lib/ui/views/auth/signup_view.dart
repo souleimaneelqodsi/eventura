@@ -1,4 +1,5 @@
 import 'package:eventura/core/viewmodels/auth/signup_viewmodel.dart';
+import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,7 @@ class SignupView extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Image.asset('assets/icon/icon.png', height: 100),
                     const SizedBox(height: 20),
                     TextField(
                       controller: _emailController,
@@ -85,8 +87,8 @@ class SignupView extends StatelessWidget {
                         onPressed:
                             viewModel.isBusy
                                 ? null
-                                : () {
-                                  viewModel.signUp(
+                                : () async {
+                                  await viewModel.signUp(
                                     context,
                                     email: _emailController.text.trim(),
                                     password: _passwordController.text,
@@ -98,16 +100,14 @@ class SignupView extends StatelessWidget {
                                     _passwordController.clear();
                                     _firstNameController.clear();
                                     _lastNameController.clear();
+                                    // ignore: use_build_context_synchronously
                                     _showConfirmationDialog(context);
                                   }
                                 },
                         child:
                             viewModel.isBusy
                                 ? const CircularProgressIndicator()
-                                : const Text(
-                                  'Sign Up',
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                                : const Text('Sign Up'),
                       ),
                     ),
                     if (viewModel.hasError &&
@@ -118,7 +118,7 @@ class SignupView extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Text(
                           'Error: ${viewModel.errorMessage}',
-                          style: const TextStyle(color: Colors.red),
+                          style: const TextStyle(color: AppColors.errorRed),
                         ),
                       ),
                     const SizedBox(height: 30),
@@ -129,9 +129,10 @@ class SignupView extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: "Sign In",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
+                                color: Theme.of(context).colorScheme.primary,
+                                decoration: TextDecoration.underline,
                               ),
                               recognizer:
                                   TapGestureRecognizer()
@@ -156,23 +157,7 @@ class SignupView extends StatelessWidget {
   }
 
   void _showConfirmationDialog(BuildContext context) {
-    final dialog =
-    // code à décommenter en cas d'exécution sur appareil mobile
-    /* Platform.isIOS
-            ? CupertinoAlertDialog(
-              title: const Text("Email confirmation"),
-              content: const Text(
-                "Please confirm your email using the link we've sent you. You're going to be redirected to the sign in page.",
-              ),
-              actions: [
-                CupertinoDialogAction(
-                  child: const Text("OK"),
-                  onPressed:
-                      () => Navigator.pushReplacementNamed(context, "/login"),
-                ),
-              ],
-            ):*/
-    AlertDialog(
+    final dialog = AlertDialog(
       title: const Text("Email confirmation"),
       content: const Text(
         "Please confirm your email using the link we've sent you. You're going to be redirected to the sign in page.",

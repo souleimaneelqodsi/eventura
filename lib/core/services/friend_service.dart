@@ -159,9 +159,54 @@ class FriendService {
 
   Future<FriendshipModel?> sendFriendRequest(String toUserId) async {
     try {
+      final currentUserId = supabaseClient.auth.currentUser!.id;
+
+      final condition1 =
+          'and(user_id_1.eq.$currentUserId,user_id_2.eq.$toUserId)';
+      final condition2 =
+          'and(user_id_1.eq.$toUserId,user_id_2.eq.$currentUserId)';
+
+      final existingFriendship = await supabaseClient
+          .from('friends')
+          .select()
+          .or('$condition1,$condition2')
+          .limit(1);
+
+      if (existingFriendship.isNotEmpty) {
+        final friendship = FriendshipModel.fromJson(existingFriendship.first);
+
+        if (friendship.status == 'rejected') {
+          if (friendship.userId2 == currentUserId) {
+            await supabaseClient
+                .from('friends')
+                .delete()
+                .eq('friendship_id', friendship.friendshipId);
+
+            final response =
+                await supabaseClient.from('friends').insert({
+                  'user_id_1': currentUserId,
+                  'user_id_2': toUserId,
+                  'status': 'pending',
+                }).select();
+
+            return FriendshipModel.fromJson(response.first);
+          } else {
+            await supabaseClient
+                .from('friends')
+                .update({'status': 'pending'})
+                .eq('friendship_id', friendship.friendshipId);
+
+            friendship.status = 'pending';
+            return friendship;
+          }
+        }
+
+        return friendship;
+      }
+
       final response =
           await supabaseClient.from('friends').insert({
-            'user_id_1': supabaseClient.auth.currentUser!.id,
+            'user_id_1': currentUserId,
             'user_id_2': toUserId,
             'status': 'pending',
           }).select();
@@ -182,7 +227,7 @@ class FriendService {
           .eq('user_id_2', toUserId)
           .eq('status', 'pending');
     } catch (e) {
-      log.e("Error canceling friend request: ${e.toString()}", error: e);
+      log.e("Error cancelling friend request: ${e.toString()}", error: e);
       rethrow;
     }
   }

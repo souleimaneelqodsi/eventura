@@ -29,29 +29,32 @@ class _CreateEventViewState extends State<CreateEventView> {
         appBar: AppBar(title: const Text("Create an event")),
         body: Consumer<EventViewmodel>(
           builder: (context, vmodel, child) {
-            return Padding(
-              padding: const EdgeInsets.all(32.0),
-              child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
+            return SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
                   child: Column(
                     children: [
                       TextFormField(
                         decoration: const InputDecoration(labelText: "Title"),
                         onChanged: (value) => title = value,
                       ),
+                      SizedBox(height: 8.0),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: "Description",
                         ),
                         onChanged: (value) => description = value,
                       ),
+                      SizedBox(height: 8.0),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: "Location",
                         ),
                         onChanged: (value) => location = value,
                       ),
+                      SizedBox(height: 8.0),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: "Capacity",
@@ -59,21 +62,14 @@ class _CreateEventViewState extends State<CreateEventView> {
                         keyboardType: TextInputType.number,
                         onChanged: (value) => capacity = int.parse(value),
                       ),
+                      SizedBox(height: 8.0),
                       SwitchListTile(
                         title: const Text("Private Event"),
                         value: isPrivate,
                         onChanged: (value) => setState(() => isPrivate = value),
                       ),
-                      Container(height: 16),
+                      SizedBox(height: 16),
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 18,
-                            horizontal: 27,
-                          ),
-                        ),
                         onPressed: () async {
                           if (_formKey.currentState!.validate()) {
                             final event = Event(
@@ -121,10 +117,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                         child:
                             vmodel.isBusy
                                 ? CircularProgressIndicator()
-                                : Text(
-                                  "Create",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
+                                : Text("Create"),
                       ),
                       SizedBox(height: 40),
                     ],

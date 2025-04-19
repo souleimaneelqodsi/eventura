@@ -1,6 +1,7 @@
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
+import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -25,8 +26,8 @@ class _FriendsViewState extends State<FriendsView> {
       foregroundColor: Colors.white,
     );
     final unselected = ElevatedButton.styleFrom(
-      backgroundColor: null,
-      foregroundColor: Colors.black,
+      backgroundColor: AppColors.secondaryGrey,
+      foregroundColor: AppColors.onSecondaryGrey,
     );
     switch (pageSwitch) {
       case Page.friends:
@@ -111,10 +112,11 @@ class _FriendsViewState extends State<FriendsView> {
                         children: [
                           Text(
                             "Add a friend",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
+                            style: Theme.of(
+                              context,
+                            ).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.bold,
+                              fontSize: 20,
                             ),
                           ),
                           SizedBox(height: 8),
@@ -128,6 +130,9 @@ class _FriendsViewState extends State<FriendsView> {
                             viewConstraints: const BoxConstraints(
                               maxHeight: 300,
                             ),
+                            viewBackgroundColor:
+                                Theme.of(context).scaffoldBackgroundColor,
+                            viewElevation: 4.0,
                             suggestionsBuilder: (
                               BuildContext context,
                               SearchController controller,
@@ -188,56 +193,101 @@ class _FriendsViewState extends State<FriendsView> {
                                   ];
                                 }
 
-                                return searchResults.map(
-                                  (user) => ListTile(
-                                    title: Text(
-                                      '${user.firstName} ${user.lastName}',
-                                    ),
-                                    subtitle: Text(user.email),
-                                    onTap: () {
-                                      controller.closeView(user.email);
-                                      showDialog(
-                                        context: context,
-                                        builder:
-                                            (context) => AlertDialog(
-                                              title: Text(
-                                                'Do you really want to add ${user.firstName} ${user.lastName} as a friend?',
+                                return searchResults
+                                    .map(
+                                      (user) => Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8.0,
+                                        ),
+                                        child: ListTile(
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 16.0,
+                                                vertical: 8.0,
                                               ),
-                                              actions: [
-                                                TextButton(
-                                                  onPressed: () {
-                                                    _viewModel
-                                                        .sendFriendRequest(
-                                                          _currentUser.userId,
-                                                          user.userId,
-                                                        );
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          'Friend request sent!',
-                                                        ),
+                                          title: Text(
+                                            '${user.firstName} ${user.lastName}',
+                                            style:
+                                                Theme.of(
+                                                  context,
+                                                ).textTheme.titleMedium,
+                                          ),
+                                          subtitle: Text(user.email),
+                                          onTap: () {
+                                            controller.closeView(user.email);
+                                            showDialog(
+                                              context: context,
+                                              builder:
+                                                  (context) => AlertDialog(
+                                                    title: Text(
+                                                      'Do you really want to add ${user.firstName} ${user.lastName} as a friend?',
+                                                    ),
+                                                    actions: [
+                                                      TextButton(
+                                                        onPressed: () async {
+                                                          await _viewModel
+                                                              .sendFriendRequest(
+                                                                _currentUser
+                                                                    .userId,
+                                                                user.userId,
+                                                              );
+                                                          if (!_viewModel
+                                                              .hasError) {
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              SnackBar(
+                                                                content: Text(
+                                                                  'Friend request sent!',
+                                                                ),
+                                                              ),
+                                                            );
+                                                            _loadData();
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                          } else {
+                                                            ScaffoldMessenger.of(
+                                                              context,
+                                                            ).showSnackBar(
+                                                              SnackBar(
+                                                                content: Text(
+                                                                  'An error occurred while sending the friend request: ${_viewModel.errorMessage}',
+                                                                ),
+                                                              ),
+                                                            );
+                                                            _viewModel.setError(
+                                                              null,
+                                                            );
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                            Navigator.pop(
+                                                              context,
+                                                            );
+                                                          }
+                                                        },
+                                                        child: Text('Yes'),
                                                       ),
-                                                    );
-                                                    _loadData();
-                                                    Navigator.pop(context);
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text('Yes'),
-                                                ),
-                                                TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text('No'),
-                                                ),
-                                              ],
-                                            ),
-                                      );
-                                    },
-                                  ),
-                                );
+                                                      TextButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(
+                                                            context,
+                                                          );
+                                                        },
+                                                        child: Text('No'),
+                                                      ),
+                                                    ],
+                                                  ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    )
+                                    .toList();
                               } catch (e) {
                                 if (e.toString().contains(
                                   "Search failed: no data returned",
@@ -283,39 +333,33 @@ class _FriendsViewState extends State<FriendsView> {
                 SizedBox(height: 8),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      ElevatedButton(
-                        style: _buttonStyle(_pageSelect, 0),
-                        onPressed:
-                            () => setState(() => _pageSelect = Page.friends),
-                        child: Text(
-                          'My Friends',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          style: _buttonStyle(_pageSelect, 0),
+                          onPressed:
+                              () => setState(() => _pageSelect = Page.friends),
+                          child: Text('My Friends'),
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      ElevatedButton(
-                        style: _buttonStyle(_pageSelect, 1),
-                        onPressed:
-                            () => setState(() => _pageSelect = Page.received),
-                        child: Text(
-                          'Received Requests',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        SizedBox(width: 8),
+                        ElevatedButton(
+                          style: _buttonStyle(_pageSelect, 1),
+                          onPressed:
+                              () => setState(() => _pageSelect = Page.received),
+                          child: Text('Received Requests'),
                         ),
-                      ),
-                      SizedBox(width: 8),
-                      ElevatedButton(
-                        style: _buttonStyle(_pageSelect, 2),
-                        onPressed:
-                            () => setState(() => _pageSelect = Page.sent),
-                        child: Text(
-                          'Sent Requests',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        SizedBox(width: 8),
+                        ElevatedButton(
+                          style: _buttonStyle(_pageSelect, 2),
+                          onPressed:
+                              () => setState(() => _pageSelect = Page.sent),
+                          child: Text('Sent Requests'),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
                 SizedBox(height: 15),
@@ -326,12 +370,14 @@ class _FriendsViewState extends State<FriendsView> {
                           : _pageSelect == Page.received
                           ? ListView(
                             children: [
-                              const ListTile(
+                              ListTile(
                                 title: Text(
                                   'Pending Requests',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelMedium?.copyWith(
                                     fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -356,26 +402,22 @@ class _FriendsViewState extends State<FriendsView> {
                                   },
                                   leading: Icon(Icons.person, size: 32),
 
-                                  title: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${entry.value!.firstName} ${entry.value!.lastName}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        entry.value!.email,
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                  title: Text(
+                                    '${entry.value!.firstName} ${entry.value!.lastName}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    entry.value!.email,
+                                    style: TextStyle(
+                                      color: AppColors.onSecondaryGreyVariant,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
@@ -431,12 +473,14 @@ class _FriendsViewState extends State<FriendsView> {
                           : _pageSelect == Page.friends
                           ? ListView(
                             children: [
-                              const ListTile(
+                              ListTile(
                                 title: Text(
                                   'Friends',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelMedium?.copyWith(
                                     fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -469,41 +513,40 @@ class _FriendsViewState extends State<FriendsView> {
                                                   child:
                                                       vmodel.isBusy
                                                           ? CircularProgressIndicator()
-                                                          : Text('Yes'),
+                                                          : Text(
+                                                            'Yes',
+                                                            style: TextStyle(
+                                                              color:
+                                                                  AppColors
+                                                                      .errorRed,
+                                                            ),
+                                                          ),
                                                   onPressed: () async {
                                                     await vmodel.deleteFriend(
                                                       friendship,
                                                     );
-                                                    if (context.mounted) {
-                                                      Navigator.pop(context);
-                                                    }
+                                                    Navigator.pop(context);
 
                                                     if (_viewModel.hasError) {
-                                                      if (context.mounted) {
-                                                        ScaffoldMessenger.of(
-                                                          context,
-                                                        ).showSnackBar(
-                                                          SnackBar(
-                                                            backgroundColor:
-                                                                Colors.red,
-                                                            content: Text(
-                                                              "Error: ${_viewModel.errorMessage!}",
-                                                            ),
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            "Error: ${_viewModel.errorMessage!}",
                                                           ),
-                                                        );
-                                                      } else {
-                                                        if (context.mounted) {
-                                                          ScaffoldMessenger.of(
-                                                            context,
-                                                          ).showSnackBar(
-                                                            SnackBar(
-                                                              content: Text(
-                                                                'Friend deleted: ${vmodel.friends[friendship]!.firstName} ${vmodel.friends[friendship]!.lastName}',
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }
-                                                      }
+                                                        ),
+                                                      );
+                                                    } else {
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            'Friend deleted: ${vmodel.friends[friendship]!.firstName} ${vmodel.friends[friendship]!.lastName}',
+                                                          ),
+                                                        ),
+                                                      );
                                                     }
                                                     _loadData();
                                                   },
@@ -517,38 +560,31 @@ class _FriendsViewState extends State<FriendsView> {
                                               ],
                                               content: Text(
                                                 'Are you sure you want to delete this friend?',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                                style:
+                                                    Theme.of(
+                                                      context,
+                                                    ).textTheme.titleMedium,
                                               ),
                                             ),
                                       );
                                     },
                                   ),
                                   title: Text(
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
                                     '${vmodel.friends[friendship]?.firstName} ${vmodel.friends[friendship]?.lastName}',
                                   ),
-                                  subtitle: RichText(
-                                    text: TextSpan(
-                                      children: <TextSpan>[
-                                        TextSpan(
-                                          text: 'since ',
-                                          style: TextStyle(
-                                            color: Colors.blueGrey,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: friendship.createdAt,
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ],
+                                  subtitle: Text(
+                                    vmodel.friends[friendship]!.email,
+                                    style: TextStyle(
+                                      color: AppColors.onSecondaryGreyVariant,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               SizedBox(height: 10),
@@ -556,12 +592,14 @@ class _FriendsViewState extends State<FriendsView> {
                           )
                           : ListView(
                             children: [
-                              const ListTile(
+                              ListTile(
                                 title: Text(
                                   'Sent Requests',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.labelMedium?.copyWith(
                                     fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
@@ -586,26 +624,22 @@ class _FriendsViewState extends State<FriendsView> {
                                   },
                                   leading: Icon(Icons.person, size: 32),
 
-                                  title: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${entry.value!.firstName} ${entry.value!.lastName}',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        entry.value!.email,
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontStyle: FontStyle.italic,
-                                        ),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                  title: Text(
+                                    '${entry.value!.firstName} ${entry.value!.lastName}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  subtitle: Text(
+                                    entry.value!.email,
+                                    style: TextStyle(
+                                      color: AppColors.onSecondaryGreyVariant,
+                                      fontStyle: FontStyle.italic,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                   trailing: IconButton(
                                     iconSize: 25,
@@ -620,7 +654,6 @@ class _FriendsViewState extends State<FriendsView> {
                                             context,
                                           ).showSnackBar(
                                             SnackBar(
-                                              backgroundColor: Colors.red,
                                               content: Text(
                                                 "Error cancelling friend request: ${_viewModel.errorMessage}",
                                               ),

@@ -10,11 +10,15 @@ class EventCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        title: Text(
-          event.title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16.0,
+          vertical: 12.0,
         ),
-        subtitle: Text(event.location),
+        title: Text(event.title, style: Theme.of(context).textTheme.titleLarge),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 8.0),
+          child: Text(event.location),
+        ),
         onTap: () {
           Navigator.pushNamed(
             context,
