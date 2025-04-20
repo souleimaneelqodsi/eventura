@@ -502,7 +502,7 @@ class _FriendsViewState extends State<FriendsView> {
                                   },
                                   leading: Icon(Icons.account_circle, size: 32),
                                   trailing: IconButton(
-                                    icon: Icon(Icons.delete, size: 24),
+                                    icon: Icon(Icons.close, size: 24),
                                     onPressed: () {
                                       showDialog(
                                         context: context,

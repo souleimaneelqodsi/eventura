@@ -1,4 +1,5 @@
 import 'package:eventura/core/viewmodels/auth/login_viewmodel.dart';
+import 'package:eventura/ui/shared/app_colors.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -99,6 +100,7 @@ class LoginView extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(top: 20.0),
                         child: Text(
+                          style: TextStyle(color: AppColors.errorRed),
                           viewModel.errorMessage ?? "An unknown error occurred",
                         ),
                       ),
