@@ -26,30 +26,58 @@
 
 ---
 
-### 📦 Installation
+📦 Installation
 
-1. **Clone the repository** :
-   ```bash
-   git clone https://github.com/souleimaneelqodsi/eventura.git
-   ```
+### Prerequisites
 
-2. **Navigate to the project directory** :
-   ```bash
-   cd eventura
-   ```
+Before you begin, ensure you have the following installed and set up on your system:
 
-3. **Install dependencies** :
-   ```bash
-   flutter pub get
-   ```
+*   **Flutter SDK**: This is essential for building and running Flutter applications. You can find installation instructions for your operating system on the official Flutter website ([https://flutter.dev/docs/get-started/install](https://flutter.dev/docs/get-started/install)).
+*   **Git**: Required to clone the project repository from GitHub. If you don't have Git, you can download it from the official Git website ([https://git-scm.com/downloads](https://git-scm.com/downloads)).
+*   **A code editor or IDE**: While not strictly required for these command-line steps, a code editor like VS Code, Android Studio, or IntelliJ IDEA with the Flutter and Dart plugins is highly recommended for development.
+*   **Web Browser**: Specifically Chrome, as recommended for compatibility.
 
-4. **Run the app** :
-   ```bash
-   flutter run
-   ```
+Now, follow these steps to get the project set up:
 
-- Choose Chrome preferably to ensure compatibility.
+1.  **Clone the repository** :
+    ```bash
+    git clone https://github.com/souleimaneelqodsi/eventura.git
+    ```
 
+2.  **Navigate to the project directory** :
+    ```bash
+    cd eventura
+    ```
+
+3.  **Obtain and create the .env file**:
+    This project requires a `.env` file containing necessary environment variables to function correctly.
+    Please contact Souleimane El Qodsi on LinkedIn at [https://linkedin.com/in/souleimaneelqodsi](https://linkedin.com/in/souleimaneelqodsi) to request the content for this file.
+    Once you receive the content, create a file named `.env` in the root of the project directory (next to the `.env.example` file) and paste the provided content into it.
+
+4.  **Add web platform support** :
+    ```bash
+    flutter create .
+    ```
+    This command updates the current project to include support for available platforms like web, adding the necessary files and the `web` folder if they are not already present.
+
+5.  **Install dependencies** :
+    ```bash
+    flutter pub get
+    ```
+
+6.  **Build the web output** (optional, but good practice to ensure everything is set up):
+    ```bash
+    flutter build web
+    ```
+    This command creates the `build/web` directory containing the files needed to run the app in a web browser.
+
+7.  **Run the app** :
+    ```bash
+    flutter run
+    ```
+    
+-   Choose Chrome preferably to ensure compatibility.
+  
 ---
 
 ### 📄 License
