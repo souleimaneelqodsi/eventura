@@ -28,7 +28,7 @@ class _EventDetailViewState extends State<EventDetailView> {
       Provider.of<EventViewmodel>(
         context,
         listen: false,
-      ).loadEvent(widget.eventId);
+      ).loadEvent(widget.eventId, context);
 
       Provider.of<FriendsViewmodel>(
         context,
@@ -75,9 +75,33 @@ class _EventDetailViewState extends State<EventDetailView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    event.title,
-                    style: Theme.of(context).textTheme.titleLarge,
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        Text(
+                          event.title,
+                          style: Theme.of(context).textTheme.titleLarge,
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            vmodel.isCurrentEventFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                          ),
+                          color:
+                              vmodel.isCurrentEventFavorited
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.6),
+                          onPressed: () async {
+                            await vmodel.toggleDetailFavoriteStatus(context);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 30),
                   RichText(
@@ -123,11 +147,11 @@ class _EventDetailViewState extends State<EventDetailView> {
                   ),
                   const SizedBox(height: 20),
 
-                  if (isParticipating)
-                    Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
+                  Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (isParticipating || isOrganizer)
                           ElevatedButton(
                             onPressed:
                                 vmodel.isBusy
@@ -144,7 +168,46 @@ class _EventDetailViewState extends State<EventDetailView> {
                                     ? const CircularProgressIndicator()
                                     : const Text('Add a friend'),
                           ),
-                          const SizedBox(height: 8),
+                        const SizedBox(height: 8),
+
+                        if (isPublic && !isParticipating && !isOrganizer)
+                          ElevatedButton(
+                            onPressed:
+                                vmodel.isBusy
+                                    ? null
+                                    : () async {
+                                      await vmodel.joinPublicEvent(
+                                        widget.eventId,
+                                      );
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content:
+                                                vmodel.hasError
+                                                    ? Text(vmodel.errorMessage!)
+                                                    : const Text(
+                                                      "Joined event successfully!",
+                                                    ),
+                                          ),
+                                        );
+                                        if (!vmodel.hasError) {
+                                          vmodel.loadEvent(
+                                            widget.eventId,
+                                            context,
+                                          );
+                                        }
+                                      }
+                                    },
+                            child:
+                                vmodel.isBusy
+                                    ? const CircularProgressIndicator()
+                                    : const Text('Join Event'),
+                          ),
+                        const SizedBox(height: 8),
+
+                        if (isParticipating && !isOrganizer)
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.warningOrange,
@@ -169,7 +232,10 @@ class _EventDetailViewState extends State<EventDetailView> {
                                           ),
                                         );
                                         if (!vmodel.hasError) {
-                                          vmodel.loadEvent(widget.eventId);
+                                          vmodel.loadEvent(
+                                            widget.eventId,
+                                            context,
+                                          );
                                         }
                                       }
                                     },
@@ -178,40 +244,10 @@ class _EventDetailViewState extends State<EventDetailView> {
                                     ? const CircularProgressIndicator()
                                     : const Text('Leave event'),
                           ),
-                          const SizedBox(height: 8),
-                        ],
-                      ),
-                    )
-                  else if (isPublic)
-                    Center(
-                      child: ElevatedButton(
-                        onPressed:
-                            vmodel.isBusy
-                                ? null
-                                : () async {
-                                  await vmodel.joinPublicEvent(widget.eventId);
-                                  if (context.mounted) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content:
-                                            vmodel.hasError
-                                                ? Text(vmodel.errorMessage!)
-                                                : const Text(
-                                                  "Joined event successfully!",
-                                                ),
-                                      ),
-                                    );
-                                    if (!vmodel.hasError) {
-                                      vmodel.loadEvent(widget.eventId);
-                                    }
-                                  }
-                                },
-                        child:
-                            vmodel.isBusy
-                                ? const CircularProgressIndicator()
-                                : const Text('Join Event'),
-                      ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
+                  ),
 
                   const SizedBox(height: 8),
 
@@ -442,7 +478,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                                 ),
                               );
 
-                              vmodel.loadEvent(eventId);
+                              vmodel.loadEvent(eventId, context);
 
                               Navigator.of(context, rootNavigator: true).pop();
                             } else {

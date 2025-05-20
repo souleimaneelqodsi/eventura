@@ -247,7 +247,7 @@ class _HomepageViewState extends State<HomepageView> {
                       ],
                     ),
 
-                    EventListView(),
+                    EventListView(pageType: EventListType.favorites),
                     friendsView,
                     MessagesView(),
                     profileView,
