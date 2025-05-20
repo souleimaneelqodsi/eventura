@@ -19,7 +19,6 @@ class _CreateEventViewState extends State<CreateEventView> {
   String location = "";
   int capacity = 0;
   bool isPrivate = false;
-  DateTime? dateOfBeginning;
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +78,15 @@ class _CreateEventViewState extends State<CreateEventView> {
                                     listen: false,
                                   ).currentUser!.id,
                               title: title,
+                              nbGuests: 1,
                               description: description,
                               location: location,
                               capacity: capacity,
-                              dateOfBeginning: DateTime.now(),
                               isPrivate: isPrivate,
+                              createdAt: DateTime.now(),
+                              beginning: DateTime.now(),
+                              //make end date 10 days after beginning
+                              end: DateTime.now().add(Duration(days: 10)),
                             );
                             await vmodel.createEvent(context, event);
                             if (!vmodel.hasError && context.mounted) {

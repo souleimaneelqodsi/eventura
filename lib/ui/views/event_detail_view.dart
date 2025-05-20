@@ -1,23 +1,47 @@
+import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
+import 'package:eventura/core/models/user.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
 
 import 'package:eventura/ui/widgets/destructive_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:logger/logger.dart';
+import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 
-class EventDetailView extends StatelessWidget {
+class EventDetailView extends StatefulWidget {
   final int eventId;
 
   const EventDetailView({required this.eventId, super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final vm = Provider.of<EventViewmodel>(context, listen: false);
+  State<EventDetailView> createState() => _EventDetailViewState();
+}
 
+class _EventDetailViewState extends State<EventDetailView> {
+  final logger = Logger();
+
+  @override
+  void initState() {
+    super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      vm.loadEvent(eventId);
-    });
+      Provider.of<EventViewmodel>(
+        context,
+        listen: false,
+      ).loadEvent(widget.eventId);
 
+      Provider.of<FriendsViewmodel>(
+        context,
+        listen: false,
+      ).fetchFriendsAndRequests(
+        Provider.of<AuthService>(context, listen: false).currentUser!.id,
+        context,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Event Details")),
       body: Consumer<EventViewmodel>(
@@ -34,123 +58,418 @@ class EventDetailView extends StatelessWidget {
               ),
             );
           }
-          if (vmodel.event == null) {
-            return const Center(child: Text("This event does not exist."));
+          if (vmodel.event == null ||
+              vmodel.isParticipating == null ||
+              vmodel.isPublic == null ||
+              vmodel.isOrganizer == null) {
+            return const Center(child: CircularProgressIndicator());
           }
           final event = vmodel.event!;
+          final isParticipating = vmodel.isParticipating!;
+          final isPublic = vmodel.isPublic!;
+          final isOrganizer = vmodel.isOrganizer!;
+
           return Padding(
             padding: const EdgeInsets.all(32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  event.title,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 30),
-                RichText(
-                  text: TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: "Location",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          decoration: TextDecoration.underline,
-                          decorationThickness: 2,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text: " : ${event.title}",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    event.title,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-                ),
-                const SizedBox(height: 8),
-                RichText(
-                  text: TextSpan(
-                    children: <TextSpan>[
-                      TextSpan(
-                        text: "Description",
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          decoration: TextDecoration.underline,
-                          decorationThickness: 2,
-                          fontWeight: FontWeight.bold,
+                  const SizedBox(height: 30),
+                  RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: "Location",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            decoration: TextDecoration.underline,
+                            decorationThickness: 2,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      TextSpan(
-                        text: " : ${event.description}",
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    DestructiveButton(
-                      icon: Icons.delete,
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder:
-                              (context) => AlertDialog(
-                                title: const Text("Delete?"),
-                                content: const Text(
-                                  "Are you sure you want to delete this event?",
-                                ),
-                                actions: [
-                                  ElevatedButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: DestructiveButton(
-                                      icon: Icons.delete,
-                                      onPressed: () async {
-                                        await vmodel.deleteEvent(
-                                          context,
-                                          vmodel.event!.eventId!,
-                                        );
-                                        if (context.mounted) {
-                                          ScaffoldMessenger.of(
-                                            context,
-                                          ).showSnackBar(
-                                            SnackBar(
-                                              content:
-                                                  vmodel.hasError
-                                                      ? Text(
-                                                        vmodel.errorMessage!,
-                                                      )
-                                                      : Text(
-                                                        "Event deleted successfully",
-                                                      ),
-                                            ),
-                                          );
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                      label: "Delete",
-                                      isLoading: vmodel.isBusy,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                        );
-                      },
-                      label: "Delete",
-                      isLoading: vmodel.isBusy,
+                        TextSpan(
+                          text: " : ${event.location}",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                  const SizedBox(height: 8),
+                  RichText(
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: "Description",
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(
+                            decoration: TextDecoration.underline,
+                            decorationThickness: 2,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextSpan(
+                          text: " : ${event.description}",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  if (isParticipating)
+                    Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ElevatedButton(
+                            onPressed:
+                                vmodel.isBusy
+                                    ? null
+                                    : () {
+                                      _showAddFriendToEventDialog(
+                                        context,
+                                        vmodel,
+                                        event.eventId!,
+                                      );
+                                    },
+                            child:
+                                vmodel.isBusy
+                                    ? const CircularProgressIndicator()
+                                    : const Text('Add a friend'),
+                          ),
+                          const SizedBox(height: 8),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.warningOrange,
+                              foregroundColor: AppColors.onWarningOrange,
+                            ),
+                            onPressed:
+                                vmodel.isBusy
+                                    ? null
+                                    : () async {
+                                      await vmodel.leaveEvent(widget.eventId);
+                                      if (context.mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content:
+                                                vmodel.hasError
+                                                    ? Text(vmodel.errorMessage!)
+                                                    : const Text(
+                                                      "Left event successfully",
+                                                    ),
+                                          ),
+                                        );
+                                        if (!vmodel.hasError) {
+                                          vmodel.loadEvent(widget.eventId);
+                                        }
+                                      }
+                                    },
+                            child:
+                                vmodel.isBusy
+                                    ? const CircularProgressIndicator()
+                                    : const Text('Leave event'),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      ),
+                    )
+                  else if (isPublic)
+                    Center(
+                      child: ElevatedButton(
+                        onPressed:
+                            vmodel.isBusy
+                                ? null
+                                : () async {
+                                  await vmodel.joinPublicEvent(widget.eventId);
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content:
+                                            vmodel.hasError
+                                                ? Text(vmodel.errorMessage!)
+                                                : const Text(
+                                                  "Joined event successfully!",
+                                                ),
+                                      ),
+                                    );
+                                    if (!vmodel.hasError) {
+                                      vmodel.loadEvent(widget.eventId);
+                                    }
+                                  }
+                                },
+                        child:
+                            vmodel.isBusy
+                                ? const CircularProgressIndicator()
+                                : const Text('Join Event'),
+                      ),
+                    ),
+
+                  const SizedBox(height: 8),
+
+                  if (isOrganizer)
+                    Center(
+                      child: DestructiveButton(
+                        icon: Icons.delete,
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder:
+                                (context) => AlertDialog(
+                                  title: const Text("Delete?"),
+                                  content: const Text(
+                                    "Are you sure you want to delete this event?",
+                                  ),
+                                  actions: [
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Cancel"),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: DestructiveButton(
+                                        icon: Icons.delete,
+                                        onPressed: () async {
+                                          await vmodel.deleteEvent(
+                                            context,
+                                            vmodel.event!.eventId!,
+                                          );
+                                          if (context.mounted) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content:
+                                                    vmodel.hasError
+                                                        ? Text(
+                                                          vmodel.errorMessage!,
+                                                        )
+                                                        : Text(
+                                                          "Event deleted successfully",
+                                                        ),
+                                              ),
+                                            );
+                                            Navigator.pop(context);
+                                          }
+                                        },
+                                        label: "Delete",
+                                        isLoading: vmodel.isBusy,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                          );
+                        },
+                        label: "Delete",
+                        isLoading: vmodel.isBusy,
+                      ),
+                    ),
+                ],
+              ),
             ),
           );
         },
       ),
+    );
+  }
+
+  void _showAddFriendToEventDialog(
+    BuildContext context,
+    EventViewmodel vmodel,
+    int eventId,
+  ) {
+    final friendsViewmodel = Provider.of<FriendsViewmodel>(
+      context,
+      listen: false,
+    );
+
+    showDialog(
+      context: context,
+      builder:
+          (context) => Dialog(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.7,
+                maxWidth: MediaQuery.of(context).size.width * 0.9,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Add friend to event",
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Search your friends by email to add them to this event.",
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    SearchAnchor.bar(
+                      barHintText: "Search your friends",
+                      viewConstraints: const BoxConstraints(maxHeight: 300),
+                      viewBackgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      viewElevation: 4.0,
+                      suggestionsBuilder: (
+                        BuildContext context,
+                        SearchController controller,
+                      ) async {
+                        final query = controller.value.text.toLowerCase();
+
+                        if (query.isEmpty) {
+                          return [
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text("Search your friends"),
+                              ),
+                            ),
+                          ];
+                        }
+
+                        final List<UserModel?> filteredFriends =
+                            friendsViewmodel.friends.values.where((friend) {
+                              if (friend == null) return false;
+
+                              return friend.email.toLowerCase().contains(
+                                    query,
+                                  ) ||
+                                  (friend.firstName?.toLowerCase().contains(
+                                        query,
+                                      ) ??
+                                      false) ||
+                                  (friend.lastName?.toLowerCase().contains(
+                                        query,
+                                      ) ??
+                                      false);
+                            }).toList();
+
+                        if (filteredFriends.isEmpty) {
+                          return [
+                            const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text(
+                                  "No friends found matching your search",
+                                ),
+                              ),
+                            ),
+                          ];
+                        }
+
+                        return filteredFriends
+                            .map(
+                              (user) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0,
+                                ),
+                                child: ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0,
+                                    vertical: 8.0,
+                                  ),
+                                  title: Text(
+                                    '${user!.firstName} ${user.lastName}',
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
+                                  ),
+                                  subtitle: Text(user.email),
+                                  onTap: () {
+                                    Navigator.pop(context, user);
+                                  },
+                                ),
+                              ),
+                            )
+                            .toList();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+    ).then((selectedUser) {
+      if (selectedUser != null && selectedUser is UserModel) {
+        _confirmAddFriendToEvent(context, vmodel, eventId, selectedUser);
+      }
+    });
+  }
+
+  void _confirmAddFriendToEvent(
+    BuildContext context,
+    EventViewmodel vmodel,
+    int eventId,
+    UserModel user,
+  ) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: Text(
+              'Add ${user.firstName} ${user.lastName} to this event?',
+            ),
+            actions: [
+              TextButton(
+                onPressed:
+                    vmodel.isBusy
+                        ? null
+                        : () async {
+                          Navigator.pop(context);
+
+                          await vmodel.addFriendToEvent(user.userId, eventId);
+
+                          if (context.mounted) {
+                            if (!vmodel.hasError) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Added ${user.firstName} ${user.lastName} to the event!',
+                                  ),
+                                ),
+                              );
+
+                              vmodel.loadEvent(eventId);
+
+                              Navigator.of(context, rootNavigator: true).pop();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Failed to add ${user.firstName} ${user.lastName} to the event: ${vmodel.errorMessage}',
+                                  ),
+                                ),
+                              );
+                              vmodel.setError(null);
+                            }
+                          }
+                        },
+                child:
+                    vmodel.isBusy
+                        ? const CircularProgressIndicator()
+                        : const Text('Yes'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('No'),
+              ),
+            ],
+          ),
     );
   }
 }

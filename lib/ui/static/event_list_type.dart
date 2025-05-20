@@ -1,0 +1,1 @@
+enum EventListType { myEvents, events }

@@ -3,6 +3,7 @@ import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
+import 'package:eventura/ui/static/event_list_type.dart';
 import 'package:eventura/ui/views/events_list_view.dart';
 import 'package:eventura/ui/views/friends_view.dart';
 import 'package:eventura/ui/views/messages_view.dart';
@@ -31,7 +32,8 @@ class _HomepageViewState extends State<HomepageView> {
   }
 
   final friendsView = FriendsView();
-  int _eventTypeIndex = 1;
+
+  int _eventTypeIndex = 0;
   int currentPageIndex = 0;
 
   final _pressedStyle =
@@ -56,7 +58,7 @@ class _HomepageViewState extends State<HomepageView> {
         builder:
             (context, profileViewmodel, child) => Scaffold(
               floatingActionButton:
-                  currentPageIndex == 0 || currentPageIndex == 1
+                  currentPageIndex == 0
                       ? SizedBox(
                         width: 50,
                         height: 50,
@@ -214,27 +216,19 @@ class _HomepageViewState extends State<HomepageView> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     ElevatedButton(
-                                      style: _pressedStyle(1, _eventTypeIndex),
+                                      style: _pressedStyle(0, _eventTypeIndex),
                                       onPressed: () {
-                                        setState(() => _eventTypeIndex = 1);
+                                        setState(() => _eventTypeIndex = 0);
                                       },
                                       child: const Text('My Events'),
                                     ),
                                     SizedBox(width: 10),
                                     ElevatedButton(
-                                      style: _pressedStyle(2, _eventTypeIndex),
+                                      style: _pressedStyle(1, _eventTypeIndex),
                                       onPressed: () {
-                                        setState(() => _eventTypeIndex = 2);
+                                        setState(() => _eventTypeIndex = 1);
                                       },
                                       child: const Text('Events'),
-                                    ),
-                                    SizedBox(width: 10),
-                                    ElevatedButton(
-                                      style: _pressedStyle(3, _eventTypeIndex),
-                                      onPressed: () {
-                                        setState(() => _eventTypeIndex = 3);
-                                      },
-                                      child: const Text('Invitations'),
                                     ),
                                   ],
                                 ),
@@ -244,14 +238,15 @@ class _HomepageViewState extends State<HomepageView> {
                         ),
                         Expanded(
                           child:
-                              _eventTypeIndex == 1
+                              _eventTypeIndex == 0
                                   ? EventListView()
-                                  : _eventTypeIndex == 2
-                                  ? EventListView()
-                                  : EventListView(),
+                                  : EventListView(
+                                    pageType: EventListType.events,
+                                  ),
                         ),
                       ],
                     ),
+
                     EventListView(),
                     friendsView,
                     MessagesView(),
