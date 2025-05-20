@@ -1,17 +1,40 @@
 import 'package:eventura/core/viewmodels/events_list_viewmodel.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
+import 'package:eventura/ui/static/event_list_type.dart';
 import 'package:eventura/ui/widgets/event_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class EventListView extends StatefulWidget {
-  const EventListView({super.key});
+  final EventListType page;
+  const EventListView({super.key, EventListType? pageType})
+    : page = pageType ?? EventListType.myEvents;
 
   @override
   EventListViewState createState() => EventListViewState();
 }
 
 class EventListViewState extends State<EventListView> {
+  @override
+  void initState() {
+    super.initState();
+    final vmodel = Provider.of<EventListViewmodel>(context, listen: false);
+    vmodel.setEventsType = widget.page;
+    vmodel.loadEvents();
+  }
+
+  @override
+  void didUpdateWidget(covariant EventListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.page != oldWidget.page) {
+      final vmodel = Provider.of<EventListViewmodel>(context, listen: false);
+      vmodel.setEventsType = widget.page;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        vmodel.loadEvents();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<EventListViewmodel>(
@@ -40,7 +63,7 @@ class EventListViewState extends State<EventListView> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () => vmodel.refreshEvents(),
+                    onPressed: () => vmodel.loadEvents(),
                     child: const Text("Try Again"),
                   ),
                 ],
@@ -57,7 +80,7 @@ class EventListViewState extends State<EventListView> {
           );
         }
         return RefreshIndicator(
-          onRefresh: () => vmodel.refreshEvents(),
+          onRefresh: () => vmodel.loadEvents(),
           child: ListView.builder(
             padding: const EdgeInsets.all(16.0),
             itemCount: vmodel.events.length,
