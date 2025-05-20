@@ -240,6 +240,83 @@ class EventService {
     }
   }
 
+  Future<bool> toggleFavorite(int eventId) async {
+    final currentUserId = _supabaseClient.auth.currentUser!.id;
+    await getEventById(eventId);
+    try {
+      final favoriteEntry =
+          await _supabaseClient
+              .from('event_favorites')
+              .select('favorite_id')
+              .eq('event_id', eventId)
+              .eq('user_id', currentUserId)
+              .maybeSingle();
+
+      if (favoriteEntry == null) {
+        await _supabaseClient.from('event_favorites').insert({
+          'user_id': currentUserId,
+          'event_id': eventId,
+        });
+        log.d('Event $eventId added to favorites for user $currentUserId');
+        return true;
+      } else {
+        await _supabaseClient
+            .from('event_favorites')
+            .delete()
+            .eq('event_id', eventId)
+            .eq('user_id', currentUserId);
+        log.d('Event $eventId removed from favorites for user $currentUserId');
+        return false;
+      }
+    } catch (e) {
+      log.e('Error toggling favorite status for event $eventId', error: e);
+      rethrow;
+    }
+  }
+
+  Future<List<Event>> getFavoriteEvents() async {
+    try {
+      final response = await _supabaseClient.rpc('get_user_favorite_events');
+
+      if (response is List) {
+        final List<Event> events =
+            response
+                .map<Event>(
+                  (json) => Event.fromJson(json as Map<String, dynamic>),
+                )
+                .toList();
+        log.d("Favorite events fetched successfully: ${events.length} events.");
+        return events;
+      } else if (response == null) {
+        log.w(
+          "RPC 'get_user_favorite_events' returned null. Returning an empty list.",
+        );
+        return [];
+      } else {
+        log.e(
+          "Unexpected response from RPC 'get_user_favorite_events'. Type: ${response.runtimeType}, Data: $response",
+        );
+        throw Exception(
+          "Unexpected response format for get_user_favorite_events.",
+        );
+      }
+    } catch (e) {
+      if (e is PostgrestException) {
+        log.e(
+          "Postgrest error calling RPC 'get_user_favorite_events': ${e.message} (Code: ${e.code})",
+          error: e,
+        );
+      } else {
+        log.e(
+          "Unexpected error calling RPC 'get_user_favorite_events'",
+          error: e,
+          stackTrace: e is Error ? e.stackTrace : null,
+        );
+      }
+      rethrow;
+    }
+  }
+
   Future<Event?> updateEvent(Event event) async {
     if (event.eventId == null) {
       throw Exception("Error: cannot update an event without an ID.");
