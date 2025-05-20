@@ -46,9 +46,6 @@ app.*.map.json
 
 # dotenv
 .env
-*.env
-.env.*
-!.env.example
 
 # private files
 ideas.md
