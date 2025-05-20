@@ -48,6 +48,8 @@
    flutter run
    ```
 
+- Choose Chrome preferably to ensure compatibility.
+
 ---
 
 ### 📄 License
