@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:eventura/core/models/friends.dart';
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
@@ -13,6 +14,11 @@ class ProfileViewmodel extends BaseViewmodel {
   UserModel? _user;
   bool? hasVerifiedEmail;
   ProfileViewmodel({required this.userService, required this.userId});
+
+  UserModel? get currentUser {
+    logger.d(_user == null ? "User is null" : _user!.firstName);
+    return _user;
+  }
 
   bool get isCurrentUserProfile {
     return userId == userService.currentUser!.id;
@@ -35,6 +41,46 @@ class ProfileViewmodel extends BaseViewmodel {
       notifyListeners();
     } catch (e) {
       setError(e.toString().replaceFirst("Exception: ", ""));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  Future<void> changeProfilePicture(File imageFile) async {
+    if (!isCurrentUserProfile || _user == null) {
+      setError(
+        "Cannot change profile picture for another user or if user is not loaded.",
+      );
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      final imageUrl = await userService.uploadProfilePicture(
+        imageFile,
+        _user!.userId,
+      );
+
+      if (imageUrl != null) {
+        final updatedUser = await userService.updateUserProfilePictureUrl(
+          _user!.userId,
+          imageUrl,
+        );
+        if (updatedUser != null) {
+          _user = updatedUser;
+        } else {
+          _user = _user?.copyWith(profilePicture: imageUrl);
+          logger.w(
+            "User record update with new profile picture URL failed, but image was uploaded.",
+          );
+        }
+      } else {
+        throw Exception("Profile picture upload failed.");
+      }
+      notifyListeners();
+    } catch (e) {
+      setError(e.toString().replaceFirst("Exception: ", ""));
+      logger.e("Error changing profile picture: $e");
     } finally {
       setBusy(false);
     }
