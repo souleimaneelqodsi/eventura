@@ -122,9 +122,8 @@ class EventCard extends StatelessWidget {
                           color:
                               isFavorited
                                   ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withOpacity(0.7),
+                                  : Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
                           size: 28,
                         ),
                         onPressed: () {
