@@ -1,7 +1,7 @@
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
-import 'package:eventura/providers.dart';
+import '../providers.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/shared/app_theme.dart';
 import 'package:eventura/ui/static/about_us.dart';

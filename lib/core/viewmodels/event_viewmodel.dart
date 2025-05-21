@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:eventura/core/models/event.dart';
 import 'package:eventura/core/services/event_service.dart';
 import 'package:eventura/core/viewmodels/base_viewmodel.dart';
@@ -24,6 +25,49 @@ class EventViewmodel extends BaseViewmodel {
   bool? get isParticipating => _isParticipating;
   bool? get isPublic => _isPublic;
   bool? get isOrganizer => _isOrganizer;
+
+  Future<void> createEvent(
+    BuildContext context,
+    Event event, {
+    File? imageFile,
+  }) async {
+    setBusy(true);
+    setError(null);
+    try {
+      Event? createdEventRecord = await _eventService.createEvent(
+        event.copyWith(coverPicture: null),
+      );
+
+      if (createdEventRecord != null &&
+          createdEventRecord.eventId != null &&
+          imageFile != null) {
+        final imageUrl = await _eventService.uploadEventImage(
+          imageFile,
+          createdEventRecord.eventId.toString(),
+        );
+        if (imageUrl != null) {
+          _event = await _eventService.updateEventCoverPicture(
+            createdEventRecord.eventId!,
+            imageUrl,
+          );
+        } else {
+          _event = createdEventRecord;
+        }
+      } else if (createdEventRecord != null) {
+        _event = createdEventRecord;
+      } else {
+        throw Exception("Failed to create event record.");
+      }
+
+      if (context.mounted && !hasError) {}
+      notifyListeners();
+    } catch (e) {
+      setError(e.toString());
+      notifyListeners();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   Future<void> loadEvent(int eventId, BuildContext context) async {
     setBusy(true);
@@ -91,22 +135,6 @@ class EventViewmodel extends BaseViewmodel {
       _isCurrentEventFavorited = originalState;
       setError(e.toString());
       notifyListeners();
-    }
-  }
-
-  Future<void> createEvent(BuildContext context, Event event) async {
-    setBusy(true);
-    setError(null);
-    try {
-      await _eventService.createEvent(event);
-      if (context.mounted) Navigator.pop(context);
-      _event = null;
-      notifyListeners();
-    } catch (e) {
-      setError(e.toString());
-      notifyListeners();
-    } finally {
-      setBusy(false);
     }
   }
 

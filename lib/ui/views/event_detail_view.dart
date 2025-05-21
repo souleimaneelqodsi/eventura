@@ -75,6 +75,47 @@ class _EventDetailViewState extends State<EventDetailView> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  if (event.coverPicture != null &&
+                      event.coverPicture!.isNotEmpty)
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        event.coverPicture!,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (
+                          BuildContext context,
+                          Widget child,
+                          ImageChunkEvent? loadingProgress,
+                        ) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value:
+                                  loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
+                                      : null,
+                            ),
+                          );
+                        },
+                        errorBuilder:
+                            (context, error, stackTrace) => Container(
+                              height: 200,
+                              width: double.infinity,
+                              color: Colors.grey[300],
+                              child: Icon(
+                                Icons.broken_image,
+                                size: 50,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                      ),
+                    ),
+                  if (event.coverPicture != null &&
+                      event.coverPicture!.isNotEmpty)
+                    const SizedBox(height: 16),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
