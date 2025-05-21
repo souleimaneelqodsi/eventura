@@ -1,5 +1,4 @@
 import 'package:eventura/core/services/auth_service.dart';
-
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/shared/is_editing_profile.dart';
@@ -29,6 +28,7 @@ class _HomepageViewState extends State<HomepageView> {
       userService: authService,
       userId: currentUserId,
     );
+    _profileViewmodel.loadProfile();
   }
 
   final friendsView = FriendsView();
@@ -88,12 +88,43 @@ class _HomepageViewState extends State<HomepageView> {
                 ),
                 title: Image.asset('assets/icon/icon.png', height: 50),
                 actions: [
-                  if (currentPageIndex != 4)
-                    IconButton(
-                      icon: const Icon(Icons.account_circle, size: 30),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/profile');
-                      },
+                  if (currentPageIndex != 4 &&
+                      profileViewmodel.currentUser != null)
+                    GestureDetector(
+                      onTap: () => Navigator.pushNamed(context, '/profile'),
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: CircleAvatar(
+                          radius: 20,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage:
+                              (profileViewmodel.currentUser!.profilePicture !=
+                                          null &&
+                                      profileViewmodel
+                                          .currentUser!
+                                          .profilePicture!
+                                          .isNotEmpty)
+                                  ? NetworkImage(
+                                    profileViewmodel
+                                        .currentUser!
+                                        .profilePicture!,
+                                  )
+                                  : null,
+                          child:
+                              (profileViewmodel.currentUser!.profilePicture ==
+                                          null ||
+                                      profileViewmodel
+                                          .currentUser!
+                                          .profilePicture!
+                                          .isEmpty)
+                                  ? Icon(
+                                    Icons.person,
+                                    size: 20,
+                                    color: Colors.grey[700],
+                                  )
+                                  : null,
+                        ),
+                      ),
                     ),
                   if (currentPageIndex == 4 &&
                       profileViewmodel.isCurrentUserProfile)

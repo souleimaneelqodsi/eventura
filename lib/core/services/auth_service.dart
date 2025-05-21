@@ -1,4 +1,6 @@
 // ignore_for_file: unnecessary_null_comparison
+import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:eventura/core/models/user.dart';
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -15,6 +17,51 @@ class AuthService {
   }
 
   User? get currentUser => _supabaseAuth.currentUser;
+
+  Future<String?> uploadProfilePicture(File imageFile, String userId) async {
+    try {
+      final fileExtension = p.extension(imageFile.path);
+      final fileName =
+          '$userId-${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+      final filePath = 'profile-pics/$fileName';
+
+      await _supabaseClient.storage
+          .from('profiles')
+          .upload(filePath, imageFile);
+
+      final response = _supabaseClient.storage
+          .from('profiles')
+          .getPublicUrl(filePath);
+      return response;
+    } catch (e) {
+      logger.e("Error uploading profile picture", error: e);
+      return null;
+    }
+  }
+
+  Future<UserModel?> updateUserProfilePictureUrl(
+    String userId,
+    String? newProfilePictureUrl,
+  ) async {
+    try {
+      final response =
+          await _supabaseClient
+              .from('users')
+              .update({'profile_picture': newProfilePictureUrl})
+              .eq('user_id', userId)
+              .select();
+
+      if (response.isEmpty) {
+        throw Exception(
+          "User update for profile picture failed: no data returned or user not found.",
+        );
+      }
+      return UserModel.fromJson(response.first);
+    } catch (error) {
+      logger.e("Error updating user profile picture URL", error: error);
+      rethrow;
+    }
+  }
 
   Future<UserModel?> createUser(UserModel user) async {
     try {

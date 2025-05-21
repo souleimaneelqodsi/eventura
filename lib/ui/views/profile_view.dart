@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
@@ -5,6 +7,7 @@ import 'package:eventura/ui/shared/is_editing_profile.dart';
 import 'package:eventura/ui/views/auth/login_view.dart';
 import 'package:eventura/ui/widgets/destructive_button.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:logger/logger.dart';
 
@@ -69,6 +72,34 @@ class _ProfileViewState extends State<ProfileView> {
     lastNameController.dispose();
     emailController.dispose();
     super.dispose();
+  }
+
+  final ImagePicker _picker = ImagePicker(); // ImagePicker instance
+
+  Future<void> _pickAndUploadImage() async {
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+      maxWidth: 800,
+    );
+
+    if (pickedFile != null) {
+      File imageFile = File(pickedFile.path);
+      await viewmodel.changeProfilePicture(imageFile);
+      if (viewmodel.hasError && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              "Error updating profile picture: ${viewmodel.errorMessage}",
+            ),
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Profile picture updated!")),
+        );
+      }
+    }
   }
 
   @override
@@ -202,7 +233,55 @@ class _ProfileViewState extends State<ProfileView> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const Icon(Icons.account_circle, size: 100),
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.grey[300],
+                              backgroundImage:
+                                  (user.profilePicture != null &&
+                                          user.profilePicture!.isNotEmpty)
+                                      ? NetworkImage(user.profilePicture!)
+                                      : null,
+                              child:
+                                  (user.profilePicture == null ||
+                                          user.profilePicture!.isEmpty)
+                                      ? Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: Colors.grey[700],
+                                      )
+                                      : null,
+                            ),
+                            if (isCurrentUser)
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: Material(
+                                  color:
+                                      Theme.of(context).colorScheme.secondary,
+                                  shape: const CircleBorder(),
+                                  elevation: 2.0,
+                                  child: InkWell(
+                                    onTap: _pickAndUploadImage,
+                                    customBorder: const CircleBorder(),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Icon(
+                                        Icons.edit,
+                                        size: 20,
+                                        color:
+                                            Theme.of(
+                                              context,
+                                            ).colorScheme.onSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
                         const SizedBox(height: 10),
                         Text(
                           '${user.firstName} ${user.lastName}',

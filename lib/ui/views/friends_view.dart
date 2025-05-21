@@ -48,6 +48,44 @@ class _FriendsViewState extends State<FriendsView> {
     }
   };
 
+  Widget _buildUserListTile({
+    required UserModel user,
+    required VoidCallback onTap,
+    Widget? trailing,
+  }) {
+    return ListTile(
+      onTap: onTap,
+      leading: CircleAvatar(
+        radius: 24,
+        backgroundColor: Colors.grey[300],
+        backgroundImage:
+            (user.profilePicture != null && user.profilePicture!.isNotEmpty)
+                ? NetworkImage(user.profilePicture!)
+                : null,
+        child:
+            (user.profilePicture == null || user.profilePicture!.isEmpty)
+                ? Icon(Icons.person, size: 24, color: Colors.grey[700])
+                : null,
+      ),
+      title: Text(
+        '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
+        style: Theme.of(
+          context,
+        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        overflow: TextOverflow.ellipsis,
+      ),
+      subtitle: Text(
+        user.email,
+        style: TextStyle(
+          color: AppColors.onSecondaryGreyVariant,
+          fontStyle: FontStyle.italic,
+        ),
+        overflow: TextOverflow.ellipsis,
+      ),
+      trailing: trailing,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -365,7 +403,11 @@ class _FriendsViewState extends State<FriendsView> {
                 SizedBox(height: 15),
                 Expanded(
                   child:
-                      vmodel.isBusy
+                      vmodel.isBusy &&
+                              !vmodel.hasError &&
+                              (vmodel.friends.isNotEmpty ||
+                                  vmodel.pendingRequestsReceived.isNotEmpty ||
+                                  vmodel.pendingRequestsSent.isNotEmpty)
                           ? const Center(child: CircularProgressIndicator())
                           : _pageSelect == Page.received
                           ? ListView(
@@ -383,7 +425,8 @@ class _FriendsViewState extends State<FriendsView> {
                               ),
                               for (var entry
                                   in vmodel.pendingRequestsReceived.entries)
-                                ListTile(
+                                _buildUserListTile(
+                                  user: entry.value!,
                                   onTap: () {
                                     final friendUserId =
                                         vmodel
@@ -400,25 +443,6 @@ class _FriendsViewState extends State<FriendsView> {
                                       ),
                                     );
                                   },
-                                  leading: Icon(Icons.person, size: 32),
-
-                                  title: Text(
-                                    '${entry.value!.firstName} ${entry.value!.lastName}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  subtitle: Text(
-                                    entry.value!.email,
-                                    style: TextStyle(
-                                      color: AppColors.onSecondaryGreyVariant,
-                                      fontStyle: FontStyle.italic,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
                                   trailing: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
@@ -468,6 +492,15 @@ class _FriendsViewState extends State<FriendsView> {
                                   ),
                                 ),
                               SizedBox(height: 10),
+                              if (vmodel.pendingRequestsReceived.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(
+                                      "No pending requests received.",
+                                    ),
+                                  ),
+                                ),
                             ],
                           )
                           : _pageSelect == Page.friends
@@ -485,7 +518,7 @@ class _FriendsViewState extends State<FriendsView> {
                                 ),
                               ),
                               for (var friendship in vmodel.friends.keys)
-                                ListTile(
+                                _buildUserListTile(
                                   onTap: () {
                                     final friendUserId =
                                         vmodel.friends[friendship]!.userId;
@@ -500,7 +533,7 @@ class _FriendsViewState extends State<FriendsView> {
                                       ),
                                     );
                                   },
-                                  leading: Icon(Icons.account_circle, size: 32),
+                                  user: vmodel.friends[friendship]!,
                                   trailing: IconButton(
                                     icon: Icon(Icons.close, size: 24),
                                     onPressed: () {
@@ -569,25 +602,17 @@ class _FriendsViewState extends State<FriendsView> {
                                       );
                                     },
                                   ),
-                                  title: Text(
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis,
-                                    '${vmodel.friends[friendship]?.firstName} ${vmodel.friends[friendship]?.lastName}',
-                                  ),
-                                  subtitle: Text(
-                                    vmodel.friends[friendship]!.email,
-                                    style: TextStyle(
-                                      color: AppColors.onSecondaryGreyVariant,
-                                      fontStyle: FontStyle.italic,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
                                 ),
                               SizedBox(height: 10),
+                              if (vmodel.friends.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(
+                                      "You haven't added any friends yet.",
+                                    ),
+                                  ),
+                                ),
                             ],
                           )
                           : ListView(
@@ -605,7 +630,7 @@ class _FriendsViewState extends State<FriendsView> {
                               ),
                               for (var entry
                                   in vmodel.pendingRequestsSent.entries)
-                                ListTile(
+                                _buildUserListTile(
                                   onTap: () {
                                     final friendUserId =
                                         vmodel
@@ -622,25 +647,7 @@ class _FriendsViewState extends State<FriendsView> {
                                       ),
                                     );
                                   },
-                                  leading: Icon(Icons.person, size: 32),
-
-                                  title: Text(
-                                    '${entry.value!.firstName} ${entry.value!.lastName}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(fontWeight: FontWeight.bold),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  subtitle: Text(
-                                    entry.value!.email,
-                                    style: TextStyle(
-                                      color: AppColors.onSecondaryGreyVariant,
-                                      fontStyle: FontStyle.italic,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
+                                  user: entry.value!,
                                   trailing: IconButton(
                                     iconSize: 25,
                                     icon: const Icon(Icons.close),
@@ -677,6 +684,13 @@ class _FriendsViewState extends State<FriendsView> {
                                   ),
                                 ),
                               SizedBox(height: 10),
+                              if (vmodel.pendingRequestsSent.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text("No friend requests sent."),
+                                  ),
+                                ),
                             ],
                           ),
                 ),
