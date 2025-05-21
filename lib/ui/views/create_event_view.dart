@@ -5,6 +5,7 @@ import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 
 class CreateEventView extends StatefulWidget {
   const CreateEventView({super.key});
@@ -23,7 +24,16 @@ class _CreateEventViewState extends State<CreateEventView> {
   bool isPrivate = false;
   File? _coverImageFile;
 
+  DateTime? _selectedBeginningDate;
+  TimeOfDay? _selectedBeginningTime;
+  DateTime? _selectedEndDate;
+  TimeOfDay? _selectedEndTime;
+
   final ImagePicker _picker = ImagePicker();
+
+  final DateFormat _dateFormatter = DateFormat('EEE, MMM d, yyyy');
+
+  final DateFormat _timeFormatter = DateFormat.jm();
 
   Future<void> _pickImage() async {
     final XFile? pickedFile = await _picker.pickImage(
@@ -34,6 +44,79 @@ class _CreateEventViewState extends State<CreateEventView> {
         _coverImageFile = File(pickedFile.path);
       });
     }
+  }
+
+  Future<void> _selectDateTime(BuildContext context, bool isBeginning) async {
+    final DateTime initialDate =
+        (isBeginning ? _selectedBeginningDate : _selectedEndDate) ??
+        DateTime.now();
+
+    final TimeOfDay initialTime =
+        (isBeginning ? _selectedBeginningTime : _selectedEndTime) ??
+        TimeOfDay.fromDateTime(initialDate);
+
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 1)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+    );
+
+    if (pickedDate == null) return;
+
+    if (!context.mounted) return;
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+
+    if (pickedTime == null) return;
+
+    setState(() {
+      if (isBeginning) {
+        _selectedBeginningDate = pickedDate;
+        _selectedBeginningTime = pickedTime;
+        if (_selectedEndDate != null && _selectedEndTime != null) {
+          final beginningDateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          final endDateTime = DateTime(
+            _selectedEndDate!.year,
+            _selectedEndDate!.month,
+            _selectedEndDate!.day,
+            _selectedEndTime!.hour,
+            _selectedEndTime!.minute,
+          );
+          if (endDateTime.isBefore(beginningDateTime)) {
+            _selectedEndDate = null;
+            _selectedEndTime = null;
+          }
+        }
+      } else {
+        _selectedEndDate = pickedDate;
+        _selectedEndTime = pickedTime;
+      }
+    });
+  }
+
+  String _formatDateTime(DateTime? date, TimeOfDay? time) {
+    if (date == null || time == null) {
+      return 'Not set';
+    }
+
+    final dateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+
+    return '${_dateFormatter.format(dateTime)} at ${_timeFormatter.format(dateTime)}';
   }
 
   @override
@@ -48,8 +131,9 @@ class _CreateEventViewState extends State<CreateEventView> {
               child: Form(
                 key: _formKey,
                 child: Padding(
-                  padding: const EdgeInsets.all(32.0),
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       TextFormField(
                         decoration: const InputDecoration(labelText: "Title"),
@@ -60,19 +144,20 @@ class _CreateEventViewState extends State<CreateEventView> {
                                     ? 'Title cannot be empty'
                                     : null,
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 16.0),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: "Description",
                         ),
                         onChanged: (value) => description = value,
+                        maxLines: 3,
                         validator:
                             (value) =>
                                 value == null || value.isEmpty
                                     ? 'Description cannot be empty'
                                     : null,
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 16.0),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: "Location",
@@ -84,7 +169,7 @@ class _CreateEventViewState extends State<CreateEventView> {
                                     ? 'Location cannot be empty'
                                     : null,
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 16.0),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: "Capacity",
@@ -100,52 +185,183 @@ class _CreateEventViewState extends State<CreateEventView> {
                           if (value == null || value.isEmpty) {
                             return 'Capacity cannot be empty';
                           }
-                          if (int.tryParse(value) == null) {
+                          final numValue = int.tryParse(value);
+                          if (numValue == null) {
                             return 'Please enter a valid number';
                           }
-                          if (int.parse(value) <= 0) {
+                          if (numValue <= 0) {
                             return 'Capacity must be greater than 0';
                           }
                           return null;
                         },
                       ),
-                      SizedBox(height: 8.0),
+                      const SizedBox(height: 20.0),
 
-                      SizedBox(height: 16),
+                      Text(
+                        "Beginning Time",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8.0),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.calendar_today),
+                        label: Text(
+                          _formatDateTime(
+                            _selectedBeginningDate,
+                            _selectedBeginningTime,
+                          ),
+                        ),
+                        onPressed: () => _selectDateTime(context, true),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                          alignment: Alignment.centerLeft,
+                          textStyle: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      const SizedBox(height: 16.0),
+
+                      Text(
+                        "End Time",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8.0),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.calendar_today),
+                        label: Text(
+                          _formatDateTime(_selectedEndDate, _selectedEndTime),
+                        ),
+                        onPressed: () => _selectDateTime(context, false),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 16,
+                          ),
+                          alignment: Alignment.centerLeft,
+                          textStyle: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                      ),
+                      const SizedBox(height: 20.0),
+
+                      Text(
+                        "Cover Image (Optional)",
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 8.0),
                       _coverImageFile == null
-                          ? ElevatedButton.icon(
+                          ? OutlinedButton.icon(
                             onPressed: _pickImage,
-                            icon: Icon(Icons.image),
-                            label: Text("Select Cover Image"),
+                            icon: const Icon(Icons.image_search),
+                            label: const Text("Select Cover Image"),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 16,
+                              ),
+                              alignment: Alignment.centerLeft,
+                              textStyle: Theme.of(context).textTheme.bodyLarge,
+                            ),
                           )
                           : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Image.file(
-                                _coverImageFile!,
-                                height: 150,
-                                fit: BoxFit.cover,
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8.0),
+                                child: Image.file(
+                                  _coverImageFile!,
+                                  height: 150,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
                               ),
+                              const SizedBox(height: 8),
                               TextButton.icon(
                                 onPressed: _pickImage,
-                                icon: Icon(Icons.edit),
-                                label: Text("Change Image"),
+                                icon: const Icon(Icons.edit),
+                                label: const Text("Change Image"),
                               ),
                             ],
                           ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 20.0),
 
                       SwitchListTile(
                         title: const Text("Private Event"),
                         value: isPrivate,
                         onChanged: (value) => setState(() => isPrivate = value),
+                        contentPadding: EdgeInsets.zero,
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 24.0),
                       ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
                         onPressed:
                             vmodel.isBusy
                                 ? null
                                 : () async {
                                   if (_formKey.currentState!.validate()) {
+                                    if (_selectedBeginningDate == null ||
+                                        _selectedBeginningTime == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Please select a beginning date and time.',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    if (_selectedEndDate == null ||
+                                        _selectedEndTime == null) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Please select an end date and time.',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    final beginningDateTime = DateTime(
+                                      _selectedBeginningDate!.year,
+                                      _selectedBeginningDate!.month,
+                                      _selectedBeginningDate!.day,
+                                      _selectedBeginningTime!.hour,
+                                      _selectedBeginningTime!.minute,
+                                    );
+
+                                    final endDateTime = DateTime(
+                                      _selectedEndDate!.year,
+                                      _selectedEndDate!.month,
+                                      _selectedEndDate!.day,
+                                      _selectedEndTime!.hour,
+                                      _selectedEndTime!.minute,
+                                    );
+
+                                    if (endDateTime.isBefore(
+                                          beginningDateTime,
+                                        ) ||
+                                        endDateTime.isAtSameMomentAs(
+                                          beginningDateTime,
+                                        )) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'End time must be after beginning time.',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
                                     _formKey.currentState!.save();
                                     final event = Event(
                                       organizerId:
@@ -160,10 +376,8 @@ class _CreateEventViewState extends State<CreateEventView> {
                                       capacity: capacity,
                                       isPrivate: isPrivate,
                                       createdAt: DateTime.now(),
-                                      beginning: DateTime.now(),
-                                      end: DateTime.now().add(
-                                        Duration(days: 10),
-                                      ),
+                                      beginning: beginningDateTime,
+                                      end: endDateTime,
                                     );
 
                                     await vmodel.createEvent(
@@ -210,10 +424,15 @@ class _CreateEventViewState extends State<CreateEventView> {
                                 },
                         child:
                             vmodel.isBusy
-                                ? CircularProgressIndicator()
-                                : Text("Create"),
+                                ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                                : const Text(
+                                  "Create Event",
+                                  style: TextStyle(fontSize: 16),
+                                ),
                       ),
-                      SizedBox(height: 40),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),

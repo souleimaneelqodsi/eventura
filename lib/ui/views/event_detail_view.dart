@@ -1,13 +1,13 @@
+import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
-import 'package:eventura/core/models/user.dart';
+import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
-
 import 'package:eventura/ui/widgets/destructive_button.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
 import 'package:logger/logger.dart';
-import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class EventDetailView extends StatefulWidget {
   final int eventId;
@@ -20,6 +20,8 @@ class EventDetailView extends StatefulWidget {
 
 class _EventDetailViewState extends State<EventDetailView> {
   final logger = Logger();
+  final DateFormat _dateFormatter = DateFormat('EEE, MMM d, yyyy');
+  final DateFormat _timeFormatter = DateFormat.jm();
 
   @override
   void initState() {
@@ -40,20 +42,87 @@ class _EventDetailViewState extends State<EventDetailView> {
     });
   }
 
+  Widget _buildDetailItem({
+    required IconData icon,
+    required String title,
+    required String content,
+    Color? iconColor,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            icon,
+            size: 24.0,
+            color: iconColor ?? Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: 16.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2.0),
+                Text(
+                  content,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(height: 1.4),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Event Details")),
+      appBar: AppBar(
+        title: Consumer<EventViewmodel>(
+          builder: (context, vmodel, child) {
+            return Text(vmodel.event?.title ?? "Event Details");
+          },
+        ),
+        elevation: 1,
+      ),
       body: Consumer<EventViewmodel>(
         builder: (context, vmodel, child) {
           if (vmodel.hasError) {
             return Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(16.0),
               child: Center(
-                child: Text(
-                  "An error occurred: ${vmodel.errorMessage}",
-                  style: TextStyle(color: AppColors.errorRed, fontSize: 20),
-                  textAlign: TextAlign.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: AppColors.errorRed,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      "An error occurred: ${vmodel.errorMessage}",
+                      style: TextStyle(color: AppColors.errorRed, fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed:
+                          () => vmodel.loadEvent(widget.eventId, context),
+                      child: const Text("Try Again"),
+                    ),
+                  ],
                 ),
               ),
             );
@@ -64,136 +133,160 @@ class _EventDetailViewState extends State<EventDetailView> {
               vmodel.isOrganizer == null) {
             return const Center(child: CircularProgressIndicator());
           }
+
           final event = vmodel.event!;
           final isParticipating = vmodel.isParticipating!;
           final isPublic = vmodel.isPublic!;
           final isOrganizer = vmodel.isOrganizer!;
 
-          return Padding(
-            padding: const EdgeInsets.all(32.0),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (event.coverPicture != null &&
-                      event.coverPicture!.isNotEmpty)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(8.0),
-                      child: Image.network(
-                        event.coverPicture!,
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (
-                          BuildContext context,
-                          Widget child,
-                          ImageChunkEvent? loadingProgress,
-                        ) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value:
-                                  loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
+          String formattedBeginning =
+              "${_dateFormatter.format(event.beginning)} at ${_timeFormatter.format(event.beginning)}";
+          String formattedEnd =
+              "${_dateFormatter.format(event.end)} at ${_timeFormatter.format(event.end)}";
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (event.coverPicture != null &&
+                    event.coverPicture!.isNotEmpty)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: Image.network(
+                      event.coverPicture!,
+                      height: 220,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (
+                        BuildContext context,
+                        Widget child,
+                        ImageChunkEvent? loadingProgress,
+                      ) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          height: 220,
+                          alignment: Alignment.center,
+                          child: CircularProgressIndicator(
+                            value:
+                                loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                          ),
+                        );
+                      },
+                      errorBuilder:
+                          (context, error, stackTrace) => Container(
+                            height: 220,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(12.0),
                             ),
-                          );
-                        },
-                        errorBuilder:
-                            (context, error, stackTrace) => Container(
-                              height: 200,
-                              width: double.infinity,
-                              color: Colors.grey[300],
-                              child: Icon(
-                                Icons.broken_image,
-                                size: 50,
-                                color: Colors.grey[600],
-                              ),
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 60,
+                              color: Colors.grey[400],
                             ),
-                      ),
-                    ),
-                  if (event.coverPicture != null &&
-                      event.coverPicture!.isNotEmpty)
-                    const SizedBox(height: 16),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        Text(
-                          event.title,
-                          style: Theme.of(context).textTheme.titleLarge,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                        ),
-                        IconButton(
-                          icon: Icon(
-                            vmodel.isCurrentEventFavorited
-                                ? Icons.favorite
-                                : Icons.favorite_border,
                           ),
-                          color:
-                              vmodel.isCurrentEventFavorited
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.onSurface
-                                      .withValues(alpha: 0.6),
-                          onPressed: () async {
-                            await vmodel.toggleDetailFavoriteStatus(context);
-                          },
-                        ),
-                      ],
                     ),
                   ),
-                  const SizedBox(height: 30),
-                  RichText(
-                    text: TextSpan(
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: "Location",
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            decoration: TextDecoration.underline,
-                            decorationThickness: 2,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: " : ${event.location}",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  RichText(
-                    text: TextSpan(
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: "Description",
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyMedium?.copyWith(
-                            decoration: TextDecoration.underline,
-                            decorationThickness: 2,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextSpan(
-                          text: " : ${event.description}",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
+                if (event.coverPicture != null &&
+                    event.coverPicture!.isNotEmpty)
                   const SizedBox(height: 20),
 
-                  Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (isParticipating || isOrganizer)
-                          ElevatedButton(
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        event.title,
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        vmodel.isCurrentEventFavorited
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        size: 28,
+                      ),
+                      color:
+                          vmodel.isCurrentEventFavorited
+                              ? Theme.of(context).colorScheme.primary
+                              : Theme.of(context).colorScheme.onSurface
+                                  .withAlpha((0.7 * 255).round()),
+                      onPressed: () async {
+                        await vmodel.toggleDetailFavoriteStatus(context);
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Divider(thickness: 1, height: 24),
+
+                _buildDetailItem(
+                  icon: Icons.calendar_today_outlined,
+                  title: "Starts",
+                  content: formattedBeginning,
+                ),
+
+                _buildDetailItem(
+                  icon: Icons.event_available_outlined,
+                  title: "Ends",
+                  content: formattedEnd,
+                ),
+
+                _buildDetailItem(
+                  icon: Icons.location_on_outlined,
+                  title: "Location",
+                  content:
+                      event.location.isNotEmpty
+                          ? event.location
+                          : "Not specified",
+                ),
+
+                if (event.description.isNotEmpty)
+                  _buildDetailItem(
+                    icon: Icons.description_outlined,
+                    title: "Description",
+                    content: event.description,
+                  ),
+
+                _buildDetailItem(
+                  icon: Icons.people_alt_outlined,
+                  title: "Capacity",
+                  content: "${event.nbGuests} / ${event.capacity} guests",
+                ),
+
+                _buildDetailItem(
+                  icon:
+                      event.isPrivate
+                          ? Icons.lock_outline
+                          : Icons.public_outlined,
+                  title: "Privacy",
+                  content: event.isPrivate ? "Private Event" : "Public Event",
+                ),
+
+                Divider(thickness: 1, height: 32),
+                const SizedBox(height: 8),
+
+                Center(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (isParticipating || isOrganizer)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: ElevatedButton.icon(
+                            icon: Icon(
+                              Icons.person_add_alt_1_outlined,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            label: const Text('Add a Friend'),
                             onPressed:
                                 vmodel.isBusy
                                     ? null
@@ -204,15 +297,17 @@ class _EventDetailViewState extends State<EventDetailView> {
                                         event.eventId!,
                                       );
                                     },
-                            child:
-                                vmodel.isBusy
-                                    ? const CircularProgressIndicator()
-                                    : const Text('Add a friend'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                           ),
-                        const SizedBox(height: 8),
-
-                        if (isPublic && !isParticipating && !isOrganizer)
-                          ElevatedButton(
+                        ),
+                      if (isPublic && !isParticipating && !isOrganizer)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.login_outlined),
+                            label: const Text('Join Event'),
                             onPressed:
                                 vmodel.isBusy
                                     ? null
@@ -241,18 +336,24 @@ class _EventDetailViewState extends State<EventDetailView> {
                                         }
                                       }
                                     },
-                            child:
-                                vmodel.isBusy
-                                    ? const CircularProgressIndicator()
-                                    : const Text('Join Event'),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
                           ),
-                        const SizedBox(height: 8),
-
-                        if (isParticipating && !isOrganizer)
-                          ElevatedButton(
+                        ),
+                      if (isParticipating && !isOrganizer)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(
+                              Icons.logout_outlined,
+                              color: Colors.black,
+                            ),
+                            label: const Text('Leave Event'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.warningOrange,
                               foregroundColor: AppColors.onWarningOrange,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             onPressed:
                                 vmodel.isBusy
@@ -280,77 +381,53 @@ class _EventDetailViewState extends State<EventDetailView> {
                                         }
                                       }
                                     },
-                            child:
-                                vmodel.isBusy
-                                    ? const CircularProgressIndicator()
-                                    : const Text('Leave event'),
                           ),
-                        const SizedBox(height: 8),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  if (isOrganizer)
-                    Center(
-                      child: DestructiveButton(
-                        icon: Icons.delete,
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder:
-                                (context) => AlertDialog(
-                                  title: const Text("Delete?"),
-                                  content: const Text(
-                                    "Are you sure you want to delete this event?",
-                                  ),
-                                  actions: [
-                                    ElevatedButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("Cancel"),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: DestructiveButton(
-                                        icon: Icons.delete,
-                                        onPressed: () async {
-                                          await vmodel.deleteEvent(
-                                            context,
-                                            vmodel.event!.eventId!,
-                                          );
-                                          if (context.mounted) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content:
-                                                    vmodel.hasError
-                                                        ? Text(
-                                                          vmodel.errorMessage!,
-                                                        )
-                                                        : Text(
-                                                          "Event deleted successfully",
-                                                        ),
-                                              ),
-                                            );
-                                            Navigator.pop(context);
-                                          }
-                                        },
-                                        label: "Delete",
-                                        isLoading: vmodel.isBusy,
+                        ),
+                      if (isOrganizer)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: DestructiveButton(
+                            icon: Icons.delete_outline,
+                            label: "Delete Event",
+                            isLoading: vmodel.isBusy,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) => AlertDialog(
+                                      title: const Text("Delete?"),
+                                      content: const Text(
+                                        "Are you sure you want to delete this event?",
                                       ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed:
+                                              () => Navigator.pop(context),
+                                          child: const Text("Cancel"),
+                                        ),
+                                        DestructiveButton(
+                                          icon: Icons.delete_forever,
+                                          label: "Delete",
+                                          isLoading: vmodel.isBusy,
+                                          onPressed: () async {
+                                            Navigator.pop(context);
+                                            await vmodel.deleteEvent(
+                                              context,
+                                              vmodel.event!.eventId!,
+                                            );
+                                          },
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                          );
-                        },
-                        label: "Delete",
-                        isLoading: vmodel.isBusy,
-                      ),
-                    ),
-                ],
-              ),
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
           );
         },
@@ -372,31 +449,37 @@ class _EventDetailViewState extends State<EventDetailView> {
       context: context,
       builder:
           (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.7,
                 maxWidth: MediaQuery.of(context).size.width * 0.9,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       "Add friend to event",
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      "Search your friends by email to add them to this event.",
+                      "Search your friends to add them to this event.",
                       textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14),
                     ),
                     const SizedBox(height: 16),
                     SearchAnchor.bar(
                       barHintText: "Search your friends",
+                      barElevation: WidgetStateProperty.all(0.0),
+                      barBackgroundColor: WidgetStateProperty.all(
+                        Theme.of(context).colorScheme.surfaceContainerHighest
+                            .withAlpha((0.5 * 255).round()),
+                      ),
                       viewConstraints: const BoxConstraints(maxHeight: 300),
                       viewBackgroundColor:
                           Theme.of(context).scaffoldBackgroundColor,
@@ -412,7 +495,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                             const Center(
                               child: Padding(
                                 padding: EdgeInsets.all(16.0),
-                                child: Text("Search your friends"),
+                                child: Text("Type to search your friends"),
                               ),
                             ),
                           ];
@@ -421,18 +504,13 @@ class _EventDetailViewState extends State<EventDetailView> {
                         final List<UserModel?> filteredFriends =
                             friendsViewmodel.friends.values.where((friend) {
                               if (friend == null) return false;
-
+                              final String fullName =
+                                  "${friend.firstName ?? ''} ${friend.lastName ?? ''}"
+                                      .toLowerCase();
                               return friend.email.toLowerCase().contains(
                                     query,
                                   ) ||
-                                  (friend.firstName?.toLowerCase().contains(
-                                        query,
-                                      ) ??
-                                      false) ||
-                                  (friend.lastName?.toLowerCase().contains(
-                                        query,
-                                      ) ??
-                                      false);
+                                  fullName.contains(query);
                             }).toList();
 
                         if (filteredFriends.isEmpty) {
@@ -450,40 +528,48 @@ class _EventDetailViewState extends State<EventDetailView> {
 
                         return filteredFriends
                             .map(
-                              (user) => Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0,
+                              (user) => ListTile(
+                                leading: CircleAvatar(
+                                  backgroundImage:
+                                      (user!.profilePicture != null &&
+                                              user.profilePicture!.isNotEmpty)
+                                          ? NetworkImage(user.profilePicture!)
+                                          : null,
+                                  child:
+                                      (user.profilePicture == null ||
+                                              user.profilePicture!.isEmpty)
+                                          ? const Icon(Icons.person)
+                                          : null,
                                 ),
-                                child: ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 16.0,
-                                    vertical: 8.0,
-                                  ),
-                                  title: Text(
-                                    '${user!.firstName} ${user.lastName}',
-                                    style:
-                                        Theme.of(context).textTheme.titleMedium,
-                                  ),
-                                  subtitle: Text(user.email),
-                                  onTap: () {
-                                    Navigator.pop(context, user);
-                                  },
+                                title: Text(
+                                  '${user.firstName} ${user.lastName}',
                                 ),
+                                subtitle: Text(user.email),
+                                onTap: () {
+                                  controller.closeView(null);
+                                  _confirmAddFriendToEvent(
+                                    context,
+                                    vmodel,
+                                    eventId,
+                                    user,
+                                  );
+                                },
                               ),
                             )
                             .toList();
                       },
+                    ),
+                    const SizedBox(height: 16),
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-    ).then((selectedUser) {
-      if (selectedUser != null && selectedUser is UserModel) {
-        _confirmAddFriendToEvent(context, vmodel, eventId, selectedUser);
-      }
-    });
+    );
   }
 
   void _confirmAddFriendToEvent(
@@ -499,8 +585,17 @@ class _EventDetailViewState extends State<EventDetailView> {
             title: Text(
               'Add ${user.firstName} ${user.lastName} to this event?',
             ),
+            content: Text(
+              "They will be notified if the event is private and they are not already a guest.",
+            ),
             actions: [
               TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
                 onPressed:
                     vmodel.isBusy
                         ? null
@@ -518,16 +613,14 @@ class _EventDetailViewState extends State<EventDetailView> {
                                   ),
                                 ),
                               );
-
                               vmodel.loadEvent(eventId, context);
-
-                              Navigator.of(context, rootNavigator: true).pop();
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'Failed to add ${user.firstName} ${user.lastName} to the event: ${vmodel.errorMessage}',
+                                    'Failed to add friend: ${vmodel.errorMessage}',
                                   ),
+                                  backgroundColor: AppColors.errorRed,
                                 ),
                               );
                               vmodel.setError(null);
@@ -536,14 +629,15 @@ class _EventDetailViewState extends State<EventDetailView> {
                         },
                 child:
                     vmodel.isBusy
-                        ? const CircularProgressIndicator()
-                        : const Text('Yes'),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('No'),
+                        ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                        : const Text('Confirm'),
               ),
             ],
           ),
