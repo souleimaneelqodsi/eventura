@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:eventura/core/services/friend_service.dart';
 import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -12,16 +14,71 @@ class EventService {
   EventService({required SupabaseClient supabaseClient})
     : _supabaseClient = supabaseClient;
 
+  Future<String?> uploadEventImage(
+    File imageFile,
+    String eventIdForPath,
+  ) async {
+    try {
+      final fileExtension = p.extension(imageFile.path);
+
+      final fileName =
+          '$eventIdForPath-${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+      final filePath = 'events/$fileName';
+
+      /*
+      final avatarFile = File('path/to/file');
+      final String fullPath = await supabase.storage.from('avatars').upload(
+            'public/avatar1.png',
+            avatarFile,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );  */
+      await _supabaseClient.storage
+          .from('eventimages')
+          .upload(filePath, imageFile);
+
+      final response = _supabaseClient.storage
+          .from('eventimages')
+          .getPublicUrl(filePath);
+      return response;
+    } catch (e) {
+      log.e("Error uploading event image", error: e);
+      return null;
+    }
+  }
+
   Future<Event?> createEvent(Event event) async {
     try {
+      final Map<String, dynamic> eventData = event.toJson();
+      eventData.remove('cover_picture');
+
       final response =
-          await _supabaseClient.from('events').insert(event.toJson()).select();
+          await _supabaseClient.from('events').insert(eventData).select();
       if (response.isEmpty) {
-        throw Exception("Couldn't create the event. DB response was empty.");
+        throw Exception(
+          "Couldn't create the event record. DB response was empty.",
+        );
       }
       return Event.fromJson(response.first);
     } catch (error) {
-      log.e("Error creating event", error: error);
+      log.e("Error creating event record", error: error);
+      rethrow;
+    }
+  }
+
+  Future<Event?> updateEventCoverPicture(int eventId, String imageUrl) async {
+    try {
+      final response =
+          await _supabaseClient
+              .from('events')
+              .update({'cover_picture': imageUrl})
+              .eq('event_id', eventId)
+              .select();
+      if (response.isEmpty) {
+        throw Exception("Couldn't update event with cover picture.");
+      }
+      return Event.fromJson(response.first);
+    } catch (error) {
+      log.e("Error updating event cover picture", error: error);
       rethrow;
     }
   }
