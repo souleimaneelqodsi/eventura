@@ -70,7 +70,6 @@ class EventService {
                   (json) => Event.fromJson(json as Map<String, dynamic>),
                 )
                 .toList();
-        log.d(result);
         return result;
       } else if (response == null) {
         log.w("RPC 'get_my_events' returned null.");
@@ -213,7 +212,6 @@ class EventService {
             return !participatingEventIds.contains(event.eventId);
           }).toList();
 
-      log.d(filteredEvents);
       return filteredEvents;
     } catch (e) {
       log.e("Error fetching public events", error: e);
@@ -257,7 +255,6 @@ class EventService {
           'user_id': currentUserId,
           'event_id': eventId,
         });
-        log.d('Event $eventId added to favorites for user $currentUserId');
         return true;
       } else {
         await _supabaseClient
@@ -265,7 +262,6 @@ class EventService {
             .delete()
             .eq('event_id', eventId)
             .eq('user_id', currentUserId);
-        log.d('Event $eventId removed from favorites for user $currentUserId');
         return false;
       }
     } catch (e) {
@@ -285,7 +281,6 @@ class EventService {
                   (json) => Event.fromJson(json as Map<String, dynamic>),
                 )
                 .toList();
-        log.d("Favorite events fetched successfully: ${events.length} events.");
         return events;
       } else if (response == null) {
         log.w(
