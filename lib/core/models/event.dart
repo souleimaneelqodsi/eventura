@@ -2,13 +2,11 @@ class Event {
   final int? eventId;
   final String organizerId;
   final String? coverPicture;
-
   final DateTime createdAt;
   final DateTime beginning;
   final DateTime end;
   final String title;
   final String description;
-  final String location;
   final int capacity;
   final bool isPrivate;
   final int nbGuests;
@@ -17,13 +15,11 @@ class Event {
     this.eventId,
     required this.organizerId,
     this.coverPicture,
-
     required this.createdAt,
     required this.beginning,
     required this.end,
     required this.title,
     required this.description,
-    required this.location,
     required this.capacity,
     required this.isPrivate,
     required this.nbGuests,
@@ -39,7 +35,7 @@ class Event {
       end: DateTime.parse(json['end'] as String),
       title: json['title'] as String,
       description: json['description'] as String,
-      location: json['location'] as String,
+
       capacity: json['capacity'] as int,
       isPrivate: (json['is_private'] as bool),
       nbGuests: json['nb_guests'] as int,
@@ -54,14 +50,13 @@ class Event {
       'end': end.toIso8601String(),
       'title': title,
       'description': description,
-      'location': location,
+
       'capacity': capacity,
       'is_private': isPrivate,
     };
     if (eventId != null) {
       data['event_id'] = eventId;
     }
-
     return data;
   }
 
@@ -69,13 +64,12 @@ class Event {
     int? eventId,
     String? organizerId,
     String? coverPicture,
-
     DateTime? createdAt,
     DateTime? beginning,
     DateTime? end,
     String? title,
     String? description,
-    String? location,
+
     int? capacity,
     bool? isPrivate,
     int? nbGuests,
@@ -84,13 +78,12 @@ class Event {
       eventId: eventId ?? this.eventId,
       organizerId: organizerId ?? this.organizerId,
       coverPicture: coverPicture ?? this.coverPicture,
-
       createdAt: createdAt ?? this.createdAt,
       beginning: beginning ?? this.beginning,
       end: end ?? this.end,
       title: title ?? this.title,
       description: description ?? this.description,
-      location: location ?? this.location,
+
       capacity: capacity ?? this.capacity,
       isPrivate: isPrivate ?? this.isPrivate,
       nbGuests: nbGuests ?? this.nbGuests,

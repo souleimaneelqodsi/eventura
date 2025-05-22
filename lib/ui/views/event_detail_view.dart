@@ -1,8 +1,11 @@
+// import 'package:eventura/core/models/activity.dart';
 import 'package:eventura/core/models/user.dart';
 import 'package:eventura/core/services/auth_service.dart';
 import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:eventura/core/viewmodels/friends_viewmodel.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
+import 'package:eventura/ui/widgets/activity_card.dart';
+import 'package:eventura/ui/widgets/suggested_activity_tile.dart';
 import 'package:eventura/ui/widgets/destructive_button.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -11,7 +14,6 @@ import 'package:provider/provider.dart';
 
 class EventDetailView extends StatefulWidget {
   final int eventId;
-
   const EventDetailView({required this.eventId, super.key});
 
   @override
@@ -27,16 +29,15 @@ class _EventDetailViewState extends State<EventDetailView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<EventViewmodel>(
-        context,
-        listen: false,
-      ).loadEvent(widget.eventId, context);
+      final eventVM = Provider.of<EventViewmodel>(context, listen: false);
+
+      eventVM.loadEvent(widget.eventId, context);
 
       Provider.of<FriendsViewmodel>(
         context,
         listen: false,
       ).fetchFriendsAndRequests(
-        Provider.of<AuthService>(context, listen: false).currentUser!.id,
+        Provider.of<AuthService>(context, listen: false).currentUser?.id ?? '',
         context,
       );
     });
@@ -98,7 +99,7 @@ class _EventDetailViewState extends State<EventDetailView> {
       ),
       body: Consumer<EventViewmodel>(
         builder: (context, vmodel, child) {
-          if (vmodel.hasError) {
+          if (vmodel.hasError && vmodel.event == null) {
             return Padding(
               padding: const EdgeInsets.all(16.0),
               child: Center(
@@ -112,7 +113,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      "An error occurred: ${vmodel.errorMessage}",
+                      "An error occurred while loading event details: ${vmodel.errorMessage}",
                       style: TextStyle(color: AppColors.errorRed, fontSize: 18),
                       textAlign: TextAlign.center,
                     ),
@@ -129,16 +130,11 @@ class _EventDetailViewState extends State<EventDetailView> {
           }
           if (vmodel.event == null ||
               vmodel.isParticipating == null ||
-              vmodel.isPublic == null ||
               vmodel.isOrganizer == null) {
             return const Center(child: CircularProgressIndicator());
           }
 
           final event = vmodel.event!;
-          final isParticipating = vmodel.isParticipating!;
-          final isPublic = vmodel.isPublic!;
-          final isOrganizer = vmodel.isOrganizer!;
-
           String formattedBeginning =
               "${_dateFormatter.format(event.beginning)} at ${_timeFormatter.format(event.beginning)}";
           String formattedEnd =
@@ -217,8 +213,9 @@ class _EventDetailViewState extends State<EventDetailView> {
                       color:
                           vmodel.isCurrentEventFavorited
                               ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurface
-                                  .withAlpha((0.7 * 255).round()),
+                              : Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.7),
                       onPressed: () async {
                         await vmodel.toggleDetailFavoriteStatus(context);
                       },
@@ -226,42 +223,135 @@ class _EventDetailViewState extends State<EventDetailView> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                Divider(thickness: 1, height: 24),
+
+                Text(
+                  "Scheduled Activities",
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                if (vmodel.acceptedActivities.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: Center(
+                      child: Text(
+                        vmodel.isOrganizer == true
+                            ? "No activities scheduled. Add some or accept suggestions!"
+                            : "No activities scheduled yet.",
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  )
+                else
+                  SizedBox(
+                    height: 150,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: vmodel.acceptedActivities.length,
+                      itemBuilder: (context, index) {
+                        final activity = vmodel.acceptedActivities[index];
+                        return ActivityCard(
+                          activity: activity,
+                          onTap: () {
+                            Navigator.pushNamed(
+                              context,
+                              '/activity_detail',
+                              arguments: {
+                                'activityId': activity.activityId,
+                                'eventViewModel': vmodel,
+                              },
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                const SizedBox(height: 16.0),
+                if (vmodel.isParticipating == true)
+                  Center(
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text("Suggest an Activity"),
+                      onPressed: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/create_activity',
+                          arguments: {
+                            'eventId': event.eventId,
+                            'eventViewModel': vmodel,
+                          },
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                if (vmodel.isOrganizer == true) ...[
+                  Divider(thickness: 1, height: 32, indent: 20, endIndent: 20),
+                  Text(
+                    "Pending Suggestions (${vmodel.pendingSuggestedActivities.length})",
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  if (vmodel.pendingSuggestedActivities.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      child: Center(
+                        child: Text(
+                          "No pending suggestions.",
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: vmodel.pendingSuggestedActivities.length,
+                      itemBuilder: (context, index) {
+                        final suggestedActivity =
+                            vmodel.pendingSuggestedActivities[index];
+
+                        return SuggestedActivityTile(
+                          activity: suggestedActivity,
+                        );
+                      },
+                    ),
+                  const SizedBox(height: 16),
+                ],
+
+                Divider(thickness: 1, height: 32),
 
                 _buildDetailItem(
                   icon: Icons.calendar_today_outlined,
-                  title: "Starts",
+                  title: "Event Starts",
                   content: formattedBeginning,
                 ),
-
                 _buildDetailItem(
                   icon: Icons.event_available_outlined,
-                  title: "Ends",
+                  title: "Event Ends",
                   content: formattedEnd,
                 ),
-
-                _buildDetailItem(
-                  icon: Icons.location_on_outlined,
-                  title: "Location",
-                  content:
-                      event.location.isNotEmpty
-                          ? event.location
-                          : "Not specified",
-                ),
-
                 if (event.description.isNotEmpty)
                   _buildDetailItem(
                     icon: Icons.description_outlined,
-                    title: "Description",
+                    title: "Event Description",
                     content: event.description,
                   ),
-
                 _buildDetailItem(
                   icon: Icons.people_alt_outlined,
                   title: "Capacity",
                   content: "${event.nbGuests} / ${event.capacity} guests",
                 ),
-
                 _buildDetailItem(
                   icon:
                       event.isPrivate
@@ -278,15 +368,13 @@ class _EventDetailViewState extends State<EventDetailView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (isParticipating || isOrganizer)
+                      if (vmodel.isParticipating == true &&
+                          vmodel.isOrganizer == false)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: ElevatedButton.icon(
-                            icon: Icon(
-                              Icons.person_add_alt_1_outlined,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            label: const Text('Add a Friend'),
+                            icon: const Icon(Icons.person_add_alt_1_outlined),
+                            label: const Text('Add a Friend to Event'),
                             onPressed:
                                 vmodel.isBusy
                                     ? null
@@ -302,7 +390,30 @@ class _EventDetailViewState extends State<EventDetailView> {
                             ),
                           ),
                         ),
-                      if (isPublic && !isParticipating && !isOrganizer)
+                      if (vmodel.isOrganizer == true)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.person_add_alt_1_outlined),
+                            label: const Text('Invite Friend to Event'),
+                            onPressed:
+                                vmodel.isBusy
+                                    ? null
+                                    : () {
+                                      _showAddFriendToEventDialog(
+                                        context,
+                                        vmodel,
+                                        event.eventId!,
+                                      );
+                                    },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      if (vmodel.isPublic == true &&
+                          vmodel.isParticipating == false &&
+                          vmodel.isOrganizer == false)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: ElevatedButton.icon(
@@ -314,41 +425,20 @@ class _EventDetailViewState extends State<EventDetailView> {
                                     : () async {
                                       await vmodel.joinPublicEvent(
                                         widget.eventId,
+                                        context,
                                       );
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content:
-                                                vmodel.hasError
-                                                    ? Text(vmodel.errorMessage!)
-                                                    : const Text(
-                                                      "Joined event successfully!",
-                                                    ),
-                                          ),
-                                        );
-                                        if (!vmodel.hasError) {
-                                          vmodel.loadEvent(
-                                            widget.eventId,
-                                            context,
-                                          );
-                                        }
-                                      }
                                     },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                           ),
                         ),
-                      if (isParticipating && !isOrganizer)
+                      if (vmodel.isParticipating == true &&
+                          vmodel.isOrganizer == false)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4.0),
                           child: ElevatedButton.icon(
-                            icon: const Icon(
-                              Icons.logout_outlined,
-                              color: Colors.black,
-                            ),
+                            icon: const Icon(Icons.logout_outlined),
                             label: const Text('Leave Event'),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.warningOrange,
@@ -359,31 +449,14 @@ class _EventDetailViewState extends State<EventDetailView> {
                                 vmodel.isBusy
                                     ? null
                                     : () async {
-                                      await vmodel.leaveEvent(widget.eventId);
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content:
-                                                vmodel.hasError
-                                                    ? Text(vmodel.errorMessage!)
-                                                    : const Text(
-                                                      "Left event successfully",
-                                                    ),
-                                          ),
-                                        );
-                                        if (!vmodel.hasError) {
-                                          vmodel.loadEvent(
-                                            widget.eventId,
-                                            context,
-                                          );
-                                        }
-                                      }
+                                      await vmodel.leaveEvent(
+                                        widget.eventId,
+                                        context,
+                                      );
                                     },
                           ),
                         ),
-                      if (isOrganizer)
+                      if (vmodel.isOrganizer == true)
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8.0),
                           child: DestructiveButton(
@@ -395,9 +468,9 @@ class _EventDetailViewState extends State<EventDetailView> {
                                 context: context,
                                 builder:
                                     (context) => AlertDialog(
-                                      title: const Text("Delete?"),
+                                      title: const Text("Delete Event?"),
                                       content: const Text(
-                                        "Are you sure you want to delete this event?",
+                                        "Are you sure you want to delete this event? This will also delete all its activities and suggestions.",
                                       ),
                                       actions: [
                                         TextButton(
@@ -444,7 +517,6 @@ class _EventDetailViewState extends State<EventDetailView> {
       context,
       listen: false,
     );
-
     showDialog(
       context: context,
       builder:
@@ -478,7 +550,7 @@ class _EventDetailViewState extends State<EventDetailView> {
                       barElevation: WidgetStateProperty.all(0.0),
                       barBackgroundColor: WidgetStateProperty.all(
                         Theme.of(context).colorScheme.surfaceContainerHighest
-                            .withAlpha((0.5 * 255).round()),
+                            .withValues(alpha: 0.5),
                       ),
                       viewConstraints: const BoxConstraints(maxHeight: 300),
                       viewBackgroundColor:
@@ -585,7 +657,7 @@ class _EventDetailViewState extends State<EventDetailView> {
             title: Text(
               'Add ${user.firstName} ${user.lastName} to this event?',
             ),
-            content: Text(
+            content: const Text(
               "They will be notified if the event is private and they are not already a guest.",
             ),
             actions: [
@@ -602,30 +674,11 @@ class _EventDetailViewState extends State<EventDetailView> {
                         : () async {
                           Navigator.pop(context);
 
-                          await vmodel.addFriendToEvent(user.userId, eventId);
-
-                          if (context.mounted) {
-                            if (!vmodel.hasError) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Added ${user.firstName} ${user.lastName} to the event!',
-                                  ),
-                                ),
-                              );
-                              vmodel.loadEvent(eventId, context);
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Failed to add friend: ${vmodel.errorMessage}',
-                                  ),
-                                  backgroundColor: AppColors.errorRed,
-                                ),
-                              );
-                              vmodel.setError(null);
-                            }
-                          }
+                          await vmodel.addFriendToEvent(
+                            user.userId,
+                            eventId,
+                            context,
+                          );
                         },
                 child:
                     vmodel.isBusy
