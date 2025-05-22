@@ -372,7 +372,6 @@ class _CreateEventViewState extends State<CreateEventView> {
                                       title: title,
                                       nbGuests: 1,
                                       description: description,
-                                      location: location,
                                       capacity: capacity,
                                       isPrivate: isPrivate,
                                       createdAt: DateTime.now(),

@@ -1,6 +1,11 @@
+import 'package:eventura/core/services/activity_service.dart';
 import 'package:eventura/core/services/auth_service.dart';
+import 'package:eventura/core/viewmodels/activity_viewmodel.dart';
+import 'package:eventura/core/viewmodels/event_viewmodel.dart';
 import 'package:eventura/core/viewmodels/profile_viewmodel.dart';
 import 'package:eventura/core/viewmodels/settings_viewmodel.dart';
+import 'package:eventura/ui/views/activity_detail_view.dart';
+import 'package:eventura/ui/views/create_activity_view.dart';
 import '../providers.dart';
 import 'package:eventura/ui/shared/app_colors.dart';
 import 'package:eventura/ui/shared/app_theme.dart';
@@ -34,7 +39,15 @@ Future<void> main() async {
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
   final supabaseKey = dotenv.env['SUPABASE_ANON_KEY'];
 
-  await Supabase.initialize(url: supabaseUrl!, anonKey: supabaseKey!);
+  if (supabaseUrl == null || supabaseKey == null) {
+    logger.e(
+      "CRITICAL ERROR: SUPABASE_URL or SUPABASE_ANON_KEY not found in .env file.",
+    );
+
+    return;
+  }
+
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -48,9 +61,8 @@ Future<void> main() async {
         ChangeNotifierProvider<SettingsViewmodel>.value(
           value: settingsViewModel,
         ),
-        ...providers.where(
-          (p) => p is! ChangeNotifierProvider<SettingsViewmodel>,
-        ),
+
+        ...providers,
       ],
       child: const Eventura(),
     ),
@@ -64,7 +76,6 @@ class NavigationObserver extends NavigatorObserver {
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didPush(route, previousRoute);
-
     if (route.settings.name == '/login') {
       _cancelSubscriptions();
     }
@@ -123,7 +134,7 @@ class Eventura extends StatelessWidget {
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
                             child: Text(
-                              "Error: No Event ID provided",
+                              "Error: No Event ID provided for event_detail",
                               style: TextStyle(color: AppColors.errorRed),
                               textAlign: TextAlign.center,
                             ),
@@ -138,39 +149,106 @@ class Eventura extends StatelessWidget {
               );
             }
 
+            if (settings.name == '/create_activity') {
+              if (settings.arguments is Map<String, dynamic>) {
+                final args = settings.arguments as Map<String, dynamic>;
+                final eventId = args['eventId'] as int?;
+                final eventViewModel =
+                    args['eventViewModel'] as EventViewmodel?;
+
+                if (eventId != null && eventViewModel != null) {
+                  return MaterialPageRoute(
+                    settings: settings,
+                    builder:
+                        (context) => CreateActivityView(
+                          eventId: eventId,
+                          eventViewModel: eventViewModel,
+                        ),
+                  );
+                }
+              }
+
+              return MaterialPageRoute(
+                builder:
+                    (_) => Scaffold(
+                      appBar: AppBar(title: const Text("Error")),
+                      body: const Center(
+                        child: Text(
+                          "Error: Invalid arguments for creating activity.",
+                        ),
+                      ),
+                    ),
+              );
+            }
+
+            if (settings.name == '/activity_detail') {
+              if (settings.arguments is Map<String, dynamic>) {
+                final args = settings.arguments as Map<String, dynamic>;
+                final activityId = args['activityId'] as int?;
+                final eventViewModel =
+                    args['eventViewModel'] as EventViewmodel?;
+
+                if (activityId != null && eventViewModel != null) {
+                  return MaterialPageRoute(
+                    settings: settings,
+                    builder:
+                        (context) => ChangeNotifierProvider(
+                          create:
+                              (_) => ActivityViewModel(
+                                activityService:
+                                    context.read<ActivityService>(),
+                                authService: context.read<AuthService>(),
+                                eventViewModel: eventViewModel,
+                              ),
+                          child: ActivityDetailView(activityId: activityId),
+                        ),
+                  );
+                }
+              }
+
+              return MaterialPageRoute(
+                builder:
+                    (_) => Scaffold(
+                      appBar: AppBar(title: const Text("Error")),
+                      body: const Center(
+                        child: Text(
+                          "Error: Invalid arguments for activity detail.",
+                        ),
+                      ),
+                    ),
+              );
+            }
+
             return null;
           },
           routes: {
-            '/': (context) => const AuthWrapper(),
             '/login': (context) => LoginView(),
             '/signup': (context) => SignupView(),
-
             '/reset_password': (context) => ResetPasswordView(),
-            '/welcome': (context) => WelcomeView(),
-            '/home': (context) => HomepageView(),
-            '/create_event': (context) => CreateEventView(),
-            '/event_detail': (context) {
+            '/welcome': (context) => const WelcomeView(),
+            '/home': (context) => const HomepageView(),
+            '/create_event': (context) => const CreateEventView(),
+            '/friends': (context) => const FriendsView(),
+            '/messages': (context) => const MessagesView(),
+            '/profile': (context) {
               final args = ModalRoute.of(context)!.settings.arguments;
-              final eventId = args as int?;
-              if (eventId == null) {
+
+              final String? potentialUserId = args is String ? args : null;
+              final String currentAuthUserId =
+                  supabase.auth.currentUser?.id ?? '';
+              final String finalUserId =
+                  (potentialUserId?.isNotEmpty ?? false)
+                      ? potentialUserId!
+                      : currentAuthUserId;
+
+              if (finalUserId.isEmpty && supabase.auth.currentUser == null) {
                 return Scaffold(
-                  appBar: AppBar(title: Text("Error")),
-                  body: Center(
-                    child: Text(
-                      "Error: No Event ID",
-                      style: TextStyle(color: AppColors.errorRed),
-                    ),
+                  appBar: AppBar(title: const Text("Error")),
+                  body: const Center(
+                    child: Text("User not authenticated and no ID provided."),
                   ),
                 );
               }
-              return EventDetailView(eventId: eventId);
-            },
-            '/friends': (context) => FriendsView(),
-            '/messages': (context) => MessagesView(),
-            '/profile': (context) {
-              final args = ModalRoute.of(context)!.settings.arguments;
-              final userId = args as String?;
-              final finalUserId = userId ?? supabase.auth.currentUser!.id;
 
               return ChangeNotifierProvider(
                 key: ValueKey('profile_route_$finalUserId'),
@@ -185,15 +263,15 @@ class Eventura extends StatelessWidget {
                 child: ProfileView(
                   userId: finalUserId,
                   fromHome: false,
-                  key: ValueKey('profile_$finalUserId'),
+                  key: ValueKey('profile_page_$finalUserId'),
                 ),
               );
             },
-            '/settings': (context) => SettingsView(),
-            '/about': (context) => AboutUs(),
-            '/contact': (context) => ContactUs(),
+            '/settings': (context) => const SettingsView(),
+            '/about': (context) => const AboutUs(),
+            '/contact': (context) => const ContactUs(),
             '/faq': (context) => FAQ(),
-            '/events_list': (context) => EventListView(),
+            '/events_list': (context) => const EventListView(),
           },
         );
       },

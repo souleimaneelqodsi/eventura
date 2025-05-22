@@ -18,9 +18,6 @@ class EventCard extends StatelessWidget {
     final titleStyle = Theme.of(
       context,
     ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold);
-    final locationStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-      color: Theme.of(context).textTheme.bodySmall?.color,
-    );
 
     return GestureDetector(
       onTap: () {
@@ -101,13 +98,6 @@ class EventCard extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        if (event.location.isNotEmpty)
-                          Text(
-                            event.location,
-                            style: locationStyle,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
                       ],
                     ),
                   ),
